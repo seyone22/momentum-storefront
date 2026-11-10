@@ -27,5 +27,6 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI || process.env.POSTGRES_URL || 'postgresql://postgres:postgres@localhost:5432/momentum_db',
     },
+    push: true,
   }),
 });
