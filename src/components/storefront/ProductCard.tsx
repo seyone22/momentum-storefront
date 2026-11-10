@@ -1,42 +1,35 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Product } from "@/lib/products";
 import { formatPriceLKR } from "@/lib/utils";
-import { ArrowUpRight } from "lucide-react";
 
 interface ProductCardProps {
   product: Product;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
-
   return (
-    <article className="group flex flex-col justify-between">
-      <Link href={`/product/${product.slug}`} className="block relative aspect-[3/4] bg-neutral-100 overflow-hidden border border-[#e5e5e0]">
-        <Image
-          src={product.heroImage}
-          alt={product.name}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
-        />
-
-        {/* Floating Pre-Order Tag */}
-        <div className="absolute top-3 left-3 bg-[#111111]/90 backdrop-blur-xs text-white text-[10px] uppercase tracking-widest px-2.5 py-1 font-medium">
-          Pre-Order Drop
-        </div>
-
-        {/* Stock pill */}
-        <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-xs text-black text-[10px] uppercase tracking-widest px-2 py-0.5 font-medium border border-neutral-200">
-          {totalStock} Pieces Planned
+    <article className="group flex flex-col justify-between border border-[#e5e5e0] bg-white p-6 transition-all hover:border-black">
+      <Link href={`/product/${product.slug}`} className="block">
+        <div className="aspect-[3/4] w-full bg-[#f4f4f0] flex flex-col items-center justify-center p-6 text-center border border-neutral-200">
+          <span className="text-[10px] uppercase tracking-[0.25em] text-neutral-400 font-medium">
+            Momentum Capsule
+          </span>
+          <span className="font-editorial text-2xl uppercase tracking-wider text-black mt-2">
+            {product.name}
+          </span>
+          <span className="text-xs text-neutral-500 mt-1">
+            {product.category}
+          </span>
+          <span className="mt-6 text-[10px] uppercase tracking-widest text-neutral-400 border border-neutral-300 px-3 py-1 bg-white">
+            Pre-Order
+          </span>
         </div>
       </Link>
 
-      <div className="pt-4 flex flex-col flex-1 justify-between">
+      <div className="pt-6 flex flex-col flex-1 justify-between">
         <div>
           <div className="flex justify-between items-baseline gap-2">
-            <h3 className="font-editorial text-xl uppercase tracking-wide text-neutral-900 group-hover:opacity-80 transition-opacity">
+            <h3 className="text-sm uppercase tracking-wider font-semibold text-black">
               <Link href={`/product/${product.slug}`}>
                 {product.name}
               </Link>
@@ -46,19 +39,15 @@ export default function ProductCard({ product }: ProductCardProps) {
             </span>
           </div>
 
-          <p className="text-xs text-neutral-500 mt-1 line-clamp-1">
-            {product.tagline}
+          <p className="text-xs text-neutral-600 mt-2 leading-relaxed">
+            {product.description}
           </p>
 
-          <div className="flex gap-1.5 mt-3">
+          <div className="flex gap-1.5 mt-4">
             {product.variants.map((v) => (
               <span
                 key={v.size}
-                className={`text-[10px] font-mono px-2 py-0.5 border ${
-                  v.stock > 0
-                    ? "border-neutral-300 text-neutral-700 bg-white"
-                    : "border-neutral-200 text-neutral-300 bg-neutral-100 line-through"
-                }`}
+                className="text-[10px] font-mono px-2 py-0.5 border border-neutral-300 text-neutral-700 bg-white"
               >
                 {v.size}
               </span>
@@ -68,10 +57,9 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         <Link
           href={`/product/${product.slug}`}
-          className="mt-5 inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.18em] font-semibold text-neutral-900 group-hover:underline underline-offset-4"
+          className="mt-6 block w-full text-center bg-black hover:bg-neutral-800 text-white text-[11px] uppercase tracking-[0.2em] font-medium py-3 transition-colors"
         >
-          <span>View Piece</span>
-          <ArrowUpRight size={14} />
+          Select Size &amp; Pre-Order
         </Link>
       </div>
     </article>
