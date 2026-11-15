@@ -2,7 +2,8 @@ import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
-   DROP TABLE IF EXISTS "users_sessions", "users", "products_variants", "products", "orders" CASCADE;
+   DROP TABLE IF EXISTS "users_sessions", "users", "products_variants", "products", "orders", "payload_kv", "payload_locked_documents_rels", "payload_locked_documents", "payload_preferences_rels", "payload_preferences" CASCADE;
+   DROP TYPE IF EXISTS "public"."enum_products_variants_size", "public"."enum_products_category", "public"."enum_orders_payment_rail", "public"."enum_orders_payment_status", "public"."enum_orders_fulfillment_status" CASCADE;
    CREATE TYPE "public"."enum_products_variants_size" AS ENUM('26', '27', '28', '29', '30', '32');
   CREATE TYPE "public"."enum_products_category" AS ENUM('Specialty Denim', 'Denim Outerwear', 'Basics');
   CREATE TYPE "public"."enum_orders_payment_rail" AS ENUM('Payments.lk', 'Bank Transfer (WhatsApp)', 'Koko / Mintpay');
@@ -110,7 +111,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"users_id" integer
   );
   
-  CREATE TABLE "payload_migrations" (
+  CREATE TABLE IF NOT EXISTS "payload_migrations" (
   	"id" serial PRIMARY KEY NOT NULL,
   	"name" varchar,
   	"batch" numeric,
@@ -156,8 +157,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "payload_preferences_rels_parent_idx" ON "payload_preferences_rels" USING btree ("parent_id");
   CREATE INDEX "payload_preferences_rels_path_idx" ON "payload_preferences_rels" USING btree ("path");
   CREATE INDEX "payload_preferences_rels_users_id_idx" ON "payload_preferences_rels" USING btree ("users_id");
-  CREATE INDEX "payload_migrations_updated_at_idx" ON "payload_migrations" USING btree ("updated_at");
-  CREATE INDEX "payload_migrations_created_at_idx" ON "payload_migrations" USING btree ("created_at");`)
+  CREATE INDEX IF NOT EXISTS "payload_migrations_updated_at_idx" ON "payload_migrations" USING btree ("updated_at");
+  CREATE INDEX IF NOT EXISTS "payload_migrations_created_at_idx" ON "payload_migrations" USING btree ("created_at");`)
 }
 
 export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
