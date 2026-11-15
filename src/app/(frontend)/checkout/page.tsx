@@ -43,6 +43,27 @@ export default function CheckoutPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
+  const [signedInEmail, setSignedInEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/account/me", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.customer) {
+          setSignedInEmail(data.customer.email);
+          setFormData((prev) => ({
+            name: prev.name || data.customer.name || "",
+            email: prev.email || data.customer.email || "",
+            phone: prev.phone || data.customer.phone || "",
+            address: prev.address || data.customer.defaultAddress || "",
+            city: prev.city || data.customer.defaultCity || "",
+          }));
+        }
+      })
+      .catch(() => {
+        // Optional session prefill
+      });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,6 +129,24 @@ export default function CheckoutPage() {
           <h1 className="font-editorial text-3xl sm:text-4xl uppercase tracking-wide text-neutral-950">
             Checkout
           </h1>
+          <p className="text-xs text-neutral-600 mt-2">
+            {signedInEmail ? (
+              <span>
+                Signed in as <strong className="text-black">{signedInEmail}</strong> &middot;{" "}
+                <Link href="/account" className="underline hover:text-black">
+                  Manage Account
+                </Link>
+              </span>
+            ) : (
+              <span>
+                Have an account?{" "}
+                <Link href="/account" className="underline hover:text-black">
+                  Sign in
+                </Link>{" "}
+                to prefill your saved address &amp; track orders.
+              </span>
+            )}
+          </p>
         </div>
 
         {!isHydrated ? (

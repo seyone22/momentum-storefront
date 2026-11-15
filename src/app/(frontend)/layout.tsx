@@ -18,6 +18,9 @@ export const metadata: Metadata = {
   title: "Momentum Clothing | Contemporary Sri Lankan Apparel",
   description:
     "Limited-batch contemporary apparel by Momentum Clothing, operated by Grace Hood Ventures (PVT) LTD, Colombo, Sri Lanka.",
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+  },
 };
 
 import { getPayload } from "payload";

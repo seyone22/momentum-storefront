@@ -109,6 +109,15 @@ export const Orders: CollectionConfig = {
       },
     },
     {
+      name: 'customer',
+      type: 'relationship',
+      relationTo: 'customers',
+      label: 'Customer Account',
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
       name: 'customerName',
       type: 'text',
       required: true,

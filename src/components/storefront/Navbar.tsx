@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingBag, Menu, X } from "lucide-react";
+import { ShoppingBag, Menu, X, User } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
 interface NavbarProps {
@@ -66,8 +66,15 @@ export default function Navbar({ cartCount, onOpenCart }: NavbarProps) {
           </Link>
         </div>
 
-        {/* Right Cart Trigger */}
-        <div className="justify-self-end flex items-center">
+        {/* Right Account & Cart Trigger */}
+        <div className="justify-self-end flex items-center space-x-1 sm:space-x-2">
+          <Link
+            href="/account"
+            className="p-2 text-neutral-900 hover:opacity-75 transition-opacity"
+            aria-label="Customer Account"
+          >
+            <User size={18} strokeWidth={1.5} />
+          </Link>
           <button
             onClick={handleOpenCart}
             className="flex items-center space-x-2 text-neutral-900 hover:opacity-75 transition-opacity p-2 -mr-2 relative"
@@ -114,6 +121,13 @@ export default function Navbar({ cartCount, onOpenCart }: NavbarProps) {
             className="hover:text-black transition-colors py-1"
           >
             Track Order
+          </Link>
+          <Link
+            href="/account"
+            onClick={() => setMobileMenuOpen(false)}
+            className="hover:text-black transition-colors py-1"
+          >
+            Account
           </Link>
         </nav>
       )}

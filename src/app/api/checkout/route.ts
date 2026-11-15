@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 import configPromise from "@payload-config";
 import { createPaymentsLkCheckout } from "@/lib/payments-lk";
+import { getAuthenticatedCustomer } from "@/lib/customer-auth";
 
 interface CheckoutItemInput {
   id: string;
@@ -144,12 +145,16 @@ export async function POST(req: NextRequest) {
 
     const fbpCookie = req.cookies.get("_fbp")?.value;
     const fbcCookie = req.cookies.get("_fbc")?.value;
+    const { customer: authenticatedCustomer } = await getAuthenticatedCustomer(req.headers, payload);
 
     // Persist order in Payload CMS (PostgreSQL)
     const createdOrder = await payload.create({
       collection: "orders",
       data: {
         orderNumber,
+        ...(authenticatedCustomer
+          ? { customer: Number(authenticatedCustomer.id) || authenticatedCustomer.id }
+          : {}),
         customerName: customer.name.trim(),
         customerPhone: customer.phone.trim(),
         customerEmail: customer.email.trim(),

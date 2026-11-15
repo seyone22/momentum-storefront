@@ -5,6 +5,7 @@ import { s3Storage } from '@payloadcms/storage-s3';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Users } from './src/collections/Users';
+import { Customers } from './src/collections/Customers';
 import { Products } from './src/collections/Products';
 import { Orders } from './src/collections/Orders';
 import { Media } from './src/collections/Media';
@@ -22,7 +23,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Products, Orders, Media, Returns],
+  collections: [Users, Customers, Products, Orders, Media, Returns],
   globals: [StoreSettings],
   plugins: [
     ...(process.env.S3_BUCKET
