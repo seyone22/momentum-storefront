@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPageLayout from "@/components/storefront/LegalPageLayout";
+import CookieSettingsButton from "@/components/storefront/CookieSettingsButton";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | Momentum Clothing",
@@ -145,20 +146,67 @@ export default function PrivacyPage() {
         </p>
       </section>
 
-      <section id="cookies" className="space-y-3 scroll-mt-24">
+      <section id="cookies" className="space-y-4 scroll-mt-24">
         <h2 className="font-semibold text-black uppercase tracking-wider text-sm pt-2">
-          5. Cookies &amp; Local Storage Technologies
+          5. Cookies, Local Storage &amp; Global Privacy Control (GPC)
         </h2>
         <p>
-          Our website uses essential cookies and browser local storage to keep your shopping bag
-          items intact, remember your cookie consent preference, and ensure secure checkout
-          routing. Where optional analytics or personalization cookies are used, they are only
-          activated in accordance with your consent choices.
+          Our website uses strictly necessary browser storage and cookies to keep your shopping bag
+          intact, support secure checkout, and record your consent choices. Optional analytics or
+          marketing cookies are <strong>only activated with your prior opt-in consent</strong>. We
+          also honor browser-level <strong>Global Privacy Control (GPC)</strong> signals by
+          automatically disabling non-essential tracking.
         </p>
+
+        <div className="overflow-x-auto border border-[#e5e5e0] bg-white">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-[#e5e5e0] bg-[#f4f4f0] text-[11px] uppercase tracking-wider text-black">
+                <th className="py-2.5 px-4 font-semibold">Storage / Cookie</th>
+                <th className="py-2.5 px-4 font-semibold">Category</th>
+                <th className="py-2.5 px-4 font-semibold">Purpose</th>
+                <th className="py-2.5 px-4 font-semibold">Duration</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#e5e5e0] text-neutral-700">
+              <tr>
+                <td className="py-2.5 px-4 font-mono text-[11px] text-black">momentum_cart_v1</td>
+                <td className="py-2.5 px-4">Strictly Necessary</td>
+                <td className="py-2.5 px-4">
+                  Persists your selected garments, sizes, and quantities in your pre-order bag.
+                </td>
+                <td className="py-2.5 px-4">Persistent (until cleared)</td>
+              </tr>
+              <tr>
+                <td className="py-2.5 px-4 font-mono text-[11px] text-black">
+                  momentum_cookie_consent_v1
+                </td>
+                <td className="py-2.5 px-4">Strictly Necessary</td>
+                <td className="py-2.5 px-4">
+                  Stores your granular cookie consent preferences and timestamp.
+                </td>
+                <td className="py-2.5 px-4">Persistent (until updated)</td>
+              </tr>
+              <tr>
+                <td className="py-2.5 px-4 font-mono text-[11px] text-black">momentum_consent</td>
+                <td className="py-2.5 px-4">Strictly Necessary</td>
+                <td className="py-2.5 px-4">
+                  First-party cookie (`SameSite=Lax`) recording your consent choices.
+                </td>
+                <td className="py-2.5 px-4">180 days</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
         <p>
-          You can manage or disable cookies through your browser settings or our cookie preference
-          banner at any time; however, disabling essential storage may affect cart and checkout
-          functionality.
+          You can review, change, or withdraw your consent at any time without affecting your
+          shopping bag:{" "}
+          <CookieSettingsButton
+            label="Manage Cookie Preferences"
+            className="underline text-black font-medium hover:opacity-75 cursor-pointer"
+          />
+          .
         </p>
       </section>
 

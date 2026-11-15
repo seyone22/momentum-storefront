@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import CookieSettingsButton from "@/components/storefront/CookieSettingsButton";
 
 export default function Footer() {
   return (
@@ -93,6 +94,9 @@ export default function Footer() {
                 <Link href="/legal/returns" className="hover:text-white transition-colors">
                   Refund &amp; Exchange Policy
                 </Link>
+              </li>
+              <li>
+                <CookieSettingsButton />
               </li>
             </ul>
           </div>
