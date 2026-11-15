@@ -9,6 +9,7 @@ import { Products } from './src/collections/Products';
 import { Orders } from './src/collections/Orders';
 import { Media } from './src/collections/Media';
 import { Returns } from './src/collections/Returns';
+import { StoreSettings } from './src/globals/StoreSettings';
 import { migrations } from './src/migrations';
 
 const filename = fileURLToPath(import.meta.url);
@@ -22,6 +23,7 @@ export default buildConfig({
     },
   },
   collections: [Users, Products, Orders, Media, Returns],
+  globals: [StoreSettings],
   plugins: [
     ...(process.env.S3_BUCKET
       ? [

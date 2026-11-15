@@ -1,4 +1,5 @@
 import { CollectionConfig } from 'payload';
+import { sendMetaCapiEvent } from '../lib/meta-capi';
 
 export const Orders: CollectionConfig = {
   slug: 'orders',
@@ -24,6 +25,75 @@ export const Orders: CollectionConfig = {
           );
         }
         return data;
+      },
+    ],
+    afterChange: [
+      async ({ doc, req, context }) => {
+        if (context?.skipCapiHook) return doc;
+
+        if (doc.paymentStatus === 'paid' && doc.capiPurchaseSent !== true) {
+          let pixelIdOverride: string | null = null;
+          try {
+            const settings = (await req.payload.findGlobal({
+              slug: 'store-settings',
+              req,
+            })) as unknown as Record<string, unknown>;
+            if (settings?.metaPixelId) {
+              pixelIdOverride = String(settings.metaPixelId);
+            }
+          } catch {
+            // Fallback to env META_PIXEL_ID
+          }
+
+          const eventId = `purchase_${String(doc.orderNumber || doc.id)}`;
+          const items = Array.isArray(doc.items)
+            ? (doc.items as Array<Record<string, unknown>>)
+            : [];
+
+          const result = await sendMetaCapiEvent({
+            eventName: 'Purchase',
+            eventId,
+            actionSource:
+              doc.paymentRail === 'Bank Transfer (WhatsApp)' ? 'chat' : 'website',
+            userData: {
+              email: doc.customerEmail ? String(doc.customerEmail) : null,
+              phone: doc.customerPhone ? String(doc.customerPhone) : null,
+              name: doc.customerName ? String(doc.customerName) : null,
+              city: doc.city ? String(doc.city) : null,
+              externalId: String(doc.orderNumber || doc.id),
+            },
+            customData: {
+              currency: 'LKR',
+              value: Number(doc.totalLkr ?? 0),
+              order_id: String(doc.orderNumber || doc.id),
+              content_type: 'product',
+              contents: items.map((i) => ({
+                id: String(i.productId || i.productName || 'item'),
+                quantity: Math.max(1, Number(i.quantity ?? 1)),
+                item_price: Number(i.unitPriceLkr ?? 0),
+              })),
+            },
+            pixelIdOverride,
+          });
+
+          if (result.sent) {
+            await req.payload.update({
+              collection: 'orders',
+              id: doc.id,
+              data: {
+                capiPurchaseSent: true,
+                capiPurchaseEventId: eventId,
+              },
+              context: {
+                ...context,
+                skipCapiHook: true,
+              },
+              req,
+            });
+          }
+        }
+
+        return doc;
       },
     ],
   },
@@ -122,6 +192,25 @@ export const Orders: CollectionConfig = {
         components: {
           Field: '@/components/admin/WhatsAppPaymentLinkButton#WhatsAppPaymentLinkButton',
         },
+      },
+    },
+    {
+      name: 'capiPurchaseSent',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Meta CAPI Purchase Sent',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'capiPurchaseEventId',
+      type: 'text',
+      label: 'Meta CAPI Event ID',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
       },
     },
     {
