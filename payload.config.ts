@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { Users } from './src/collections/Users';
 import { Products } from './src/collections/Products';
 import { Orders } from './src/collections/Orders';
+import { migrations } from './src/migrations';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -28,5 +29,6 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URI || process.env.POSTGRES_URL || 'postgresql://postgres:postgres@localhost:5432/momentum_db',
     },
     push: true,
+    prodMigrations: migrations,
   }),
 });
