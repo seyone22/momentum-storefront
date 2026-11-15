@@ -12,6 +12,7 @@ export interface CreateCheckoutParams {
   description: string;
   customer: CustomerInfo;
   returnUrl?: string;
+  cancelUrl?: string;
 }
 
 export interface PaymentsLkCheckoutResponse {
@@ -46,7 +47,16 @@ export async function createPaymentsLkCheckout(
   const payload: Record<string, any> = {
     amountCents,
     description: params.description,
+    reference: params.orderId,
   };
+
+  if (params.returnUrl) {
+    payload.successUrl = params.returnUrl;
+  }
+
+  if (params.cancelUrl) {
+    payload.cancelUrl = params.cancelUrl;
+  }
 
   const response = await fetch(`${PAYMENTS_LK_API_URL}/checkouts`, {
     method: "POST",

@@ -165,6 +165,17 @@ export default function CartDrawer({
               <span>Proceed to Checkout</span>
               <ArrowRight size={16} />
             </Link>
+
+            <p className="text-[11px] text-neutral-500 text-center">
+              Islandwide delivery via Prompt Xpress ·{" "}
+              <Link href="/legal/shipping" onClick={onClose} className="underline hover:text-black">
+                Shipping
+              </Link>{" "}
+              &amp;{" "}
+              <Link href="/legal/returns" onClick={onClose} className="underline hover:text-black">
+                7-Day Exchange Policy
+              </Link>
+            </p>
           </div>
         )}
       </div>

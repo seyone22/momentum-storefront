@@ -15,19 +15,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid JSON webhook payload" }, { status: 400 });
     }
 
+    const nestedData =
+      eventData.data && typeof eventData.data === "object"
+        ? (eventData.data as Record<string, unknown>)
+        : undefined;
+
     const orderNumber = String(
-      eventData.orderId ||
-        eventData.order_id ||
+      nestedData?.reference ||
+        nestedData?.orderId ||
+        nestedData?.order_id ||
         eventData.reference ||
-        (eventData.data as Record<string, unknown> | undefined)?.orderId ||
+        eventData.orderId ||
+        eventData.order_id ||
         ""
     ).trim();
 
     const rawStatus = String(
-      eventData.status ||
-        eventData.paymentStatus ||
+      eventData.type ||
         eventData.event ||
-        (eventData.data as Record<string, unknown> | undefined)?.status ||
+        eventData.status ||
+        eventData.paymentStatus ||
+        nestedData?.status ||
         ""
     ).toLowerCase();
 

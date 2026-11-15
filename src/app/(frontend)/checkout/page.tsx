@@ -21,10 +21,15 @@ export default function CheckoutPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [acceptedPolicies, setAcceptedPolicies] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) return;
+    if (!acceptedPolicies) {
+      setError("Please accept the Terms & Conditions and Privacy Policy to proceed.");
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -57,12 +62,11 @@ export default function CheckoutPage() {
         throw new Error(data.error || "Failed to create checkout session");
       }
 
-      clearCart();
-
       const redirectUrl = data.checkoutUrl || data.paymentUrl || data.url;
       if (redirectUrl) {
         window.location.href = redirectUrl;
       } else {
+        clearCart();
         window.location.href = `/order/confirmed/${data.orderNumber}`;
       }
     } catch (err: unknown) {
@@ -191,11 +195,58 @@ export default function CheckoutPage() {
                   />
                 </div>
 
-                <div className="pt-4">
+                <div className="pt-2">
+                  <label className="flex items-start gap-2.5 text-xs text-neutral-600 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      required
+                      checked={acceptedPolicies}
+                      onChange={(e) => setAcceptedPolicies(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 accent-black border-neutral-300 cursor-pointer shrink-0"
+                    />
+                    <span className="leading-relaxed">
+                      I have read and agree to the{" "}
+                      <Link
+                        href="/legal/terms"
+                        target="_blank"
+                        className="underline text-black hover:opacity-75"
+                      >
+                        Terms &amp; Conditions
+                      </Link>
+                      ,{" "}
+                      <Link
+                        href="/legal/privacy"
+                        target="_blank"
+                        className="underline text-black hover:opacity-75"
+                      >
+                        Privacy Policy
+                      </Link>
+                      ,{" "}
+                      <Link
+                        href="/legal/shipping"
+                        target="_blank"
+                        className="underline text-black hover:opacity-75"
+                      >
+                        Shipping Policy
+                      </Link>
+                      , and{" "}
+                      <Link
+                        href="/legal/returns"
+                        target="_blank"
+                        className="underline text-black hover:opacity-75"
+                      >
+                        Refund &amp; Exchange Policy
+                      </Link>
+                      .
+                    </span>
+                  </label>
+                </div>
+
+                <div className="pt-2">
                   <button
                     type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-black hover:bg-neutral-800 text-white text-xs uppercase tracking-[0.2em] font-semibold py-4 px-6 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75"
+                    disabled={isLoading || !acceptedPolicies}
+                    className="w-full bg-black hover:bg-neutral-800 text-white text-xs uppercase tracking-[0.2em] font-semibold py-4 px-6 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isLoading ? (
                       <>
@@ -210,6 +261,9 @@ export default function CheckoutPage() {
                       </>
                     )}
                   </button>
+                  <p className="mt-3 text-[11px] text-neutral-500 text-center">
+                    256-bit SSL encrypted checkout via Payments.lk (CBSL compliant) · All prices in LKR.
+                  </p>
                 </div>
               </form>
             </div>

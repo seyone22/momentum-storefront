@@ -17,7 +17,15 @@ export default function Footer() {
               className="h-7 w-auto invert brightness-200"
             />
             <p className="text-xs text-neutral-400 max-w-sm leading-relaxed">
-              Grace Hood Ventures (PVT) LTD. Limited-batch contemporary apparel.
+              Grace Hood Ventures (PVT) LTD (Reg. No: PV 00329182). Limited-batch contemporary apparel.
+            </p>
+            <p className="text-xs text-neutral-400">
+              <a
+                href="mailto:care@momentumclothing.lk"
+                className="hover:text-white transition-colors"
+              >
+                care@momentumclothing.lk
+              </a>
             </p>
           </div>
 
@@ -33,8 +41,18 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/products" className="hover:text-white transition-colors">
+                  Shop All
+                </Link>
+              </li>
+              <li>
                 <Link href="/track" className="hover:text-white transition-colors">
                   Order Tracking
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="hover:text-white transition-colors">
+                  FAQs
                 </Link>
               </li>
               <li>
@@ -53,7 +71,7 @@ export default function Footer() {
           {/* Legal */}
           <div className="space-y-3">
             <h4 className="text-[11px] uppercase tracking-[0.2em] font-medium text-neutral-400">
-              Information
+              Information &amp; Legal
             </h4>
             <ul className="space-y-2 text-xs text-neutral-300">
               <li>
@@ -67,8 +85,13 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/legal/shipping" className="hover:text-white transition-colors">
+                  Shipping Policy
+                </Link>
+              </li>
+              <li>
                 <Link href="/legal/returns" className="hover:text-white transition-colors">
-                  Refund &amp; Return Policy
+                  Refund &amp; Exchange Policy
                 </Link>
               </li>
             </ul>

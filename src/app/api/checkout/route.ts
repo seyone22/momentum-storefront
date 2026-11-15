@@ -154,6 +154,12 @@ export async function POST(req: NextRequest) {
       .map((i) => `${i.productName} (${i.size}) x${i.quantity}`)
       .join(", ");
 
+    const forwardedHost = req.headers.get("x-forwarded-host") || req.headers.get("host");
+    const forwardedProto = req.headers.get("x-forwarded-proto") || "https";
+    const origin = forwardedHost
+      ? `${forwardedProto}://${forwardedHost}`
+      : req.nextUrl.origin;
+
     const checkout = await createPaymentsLkCheckout({
       orderId: orderNumber,
       amountLkr: totalLkr,
@@ -165,6 +171,8 @@ export async function POST(req: NextRequest) {
         address: customer.address.trim(),
         city: customer.city.trim(),
       },
+      returnUrl: `${origin}/order/confirmed/${orderNumber}`,
+      cancelUrl: `${origin}/checkout`,
     });
 
     return NextResponse.json({
