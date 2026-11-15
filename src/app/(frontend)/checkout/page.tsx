@@ -387,20 +387,48 @@ export default function CheckoutPage() {
             </div>
 
             {/* Order Summary */}
-            <div className="md:col-span-5 bg-[#f4f4f0] p-6 border border-[#e5e5de] space-y-4">
-              <h3 className="text-xs uppercase tracking-[0.2em] font-semibold text-black pb-3 border-b border-neutral-300">
-                Order Summary
-              </h3>
+            <div className="md:col-span-5 bg-[#f4f4f0] p-6 border border-[#e5e5de] space-y-5 md:sticky md:top-24">
+              <div className="flex items-center justify-between pb-3 border-b border-neutral-300">
+                <h3 className="text-xs uppercase tracking-[0.2em] font-semibold text-black">
+                  Order Summary
+                </h3>
+                <span className="text-[11px] uppercase tracking-wider text-neutral-500">
+                  {items.reduce((sum, i) => sum + i.quantity, 0)}{" "}
+                  {items.reduce((sum, i) => sum + i.quantity, 0) === 1 ? "Piece" : "Pieces"}
+                </span>
+              </div>
 
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {items.map((item) => (
-                  <div key={`${item.id}-${item.size}`} className="flex justify-between text-xs gap-3">
-                    <div>
-                      <h4 className="font-semibold text-black">{item.name}</h4>
-                      <p className="text-neutral-500">
-                        Size: {item.size} &times; {item.quantity}
+                  <div
+                    key={`${item.id}-${item.size}`}
+                    className="flex items-center gap-3.5 text-xs"
+                  >
+                    <div className="relative w-14 h-[72px] bg-white border border-[#e2e2dc] shrink-0 overflow-hidden">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-neutral-300">
+                          <ShoppingBag size={18} strokeWidth={1.25} />
+                        </div>
+                      )}
+                      <span className="absolute -top-0.5 -right-0.5 bg-black text-white font-mono text-[10px] w-5 h-5 flex items-center justify-center">
+                        {item.quantity}
+                      </span>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-black truncate">{item.name}</h4>
+                      <p className="text-neutral-500 mt-0.5">Size: {item.size}</p>
+                      <p className="text-[11px] text-neutral-400 font-mono mt-0.5">
+                        {formatPriceLKR(item.priceLkr)} each
                       </p>
                     </div>
+
                     <span className="font-mono font-medium text-black shrink-0">
                       {formatPriceLKR(item.priceLkr * item.quantity)}
                     </span>
@@ -408,9 +436,24 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
-              <div className="border-t border-neutral-300 pt-4 flex justify-between text-sm font-semibold text-black">
-                <span>Total</span>
-                <span className="font-mono">{formatPriceLKR(subtotal)}</span>
+              <div className="border-t border-neutral-300 pt-4 space-y-2 text-xs text-neutral-600">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span className="font-mono text-black">{formatPriceLKR(subtotal)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Islandwide Courier (Prompt Xpress)</span>
+                  <span className="uppercase tracking-wider text-neutral-800">Complimentary</span>
+                </div>
+                <div className="flex justify-between text-[11px] text-neutral-500 pt-1">
+                  <span>Pre-Order Dispatch</span>
+                  <span>2nd Week of Dec 2026</span>
+                </div>
+              </div>
+
+              <div className="border-t border-neutral-300 pt-4 flex justify-between items-baseline text-sm font-semibold text-black">
+                <span className="uppercase tracking-wider text-xs">Total</span>
+                <span className="font-mono text-base">{formatPriceLKR(subtotal)}</span>
               </div>
             </div>
           </div>
