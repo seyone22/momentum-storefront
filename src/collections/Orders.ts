@@ -6,12 +6,35 @@ export const Orders: CollectionConfig = {
     useAsTitle: 'orderNumber',
     defaultColumns: ['orderNumber', 'customerName', 'totalLkr', 'paymentStatus', 'fulfillmentStatus'],
   },
+  hooks: {
+    beforeChange: [
+      async ({ data, operation }) => {
+        if (operation === 'create' && !data.orderNumber) {
+          data.orderNumber = `MMTM-${Math.floor(100000 + Math.random() * 900000)}`;
+        }
+        if (
+          (!data.totalLkr || Number(data.totalLkr) <= 0) &&
+          Array.isArray(data.items) &&
+          data.items.length > 0
+        ) {
+          data.totalLkr = (data.items as Array<Record<string, unknown>>).reduce(
+            (sum, item) =>
+              sum + Math.max(1, Number(item.quantity ?? 1)) * Math.max(0, Number(item.unitPriceLkr ?? 0)),
+            0
+          );
+        }
+        return data;
+      },
+    ],
+  },
   fields: [
     {
       name: 'orderNumber',
       type: 'text',
-      required: true,
       unique: true,
+      admin: {
+        description: 'Auto-generated (MMTM-XXXXXX) if left blank.',
+      },
     },
     {
       name: 'customerName',
@@ -40,7 +63,10 @@ export const Orders: CollectionConfig = {
     {
       name: 'totalLkr',
       type: 'number',
-      required: true,
+      defaultValue: 0,
+      admin: {
+        description: 'Leave as 0 to auto-calculate from Ordered Items.',
+      },
     },
     {
       name: 'paymentRail',
@@ -77,6 +103,25 @@ export const Orders: CollectionConfig = {
       admin: {
         readOnly: true,
         position: 'sidebar',
+      },
+    },
+    {
+      name: 'paymentLinkUrl',
+      type: 'text',
+      label: 'WhatsApp Payment Link',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'paymentLinkAction',
+      type: 'ui',
+      admin: {
+        position: 'sidebar',
+        components: {
+          Field: '@/components/admin/WhatsAppPaymentLinkButton#WhatsAppPaymentLinkButton',
+        },
       },
     },
     {

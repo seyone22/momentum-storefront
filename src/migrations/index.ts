@@ -3,6 +3,7 @@ import * as migration_20261115_123643_add_media_and_product_fields from './20261
 import * as migration_20261115_124439_add_order_items from './20261115_124439_add_order_items';
 import * as migration_20261115_131200_add_media_s3_objectkey from './20261115_131200_add_media_s3_objectkey';
 import * as migration_20261115_133000_add_returns_and_refunds from './20261115_133000_add_returns_and_refunds';
+import * as migration_20261115_135000_add_order_payment_link from './20261115_135000_add_order_payment_link';
 
 export const migrations = [
   {
@@ -29,5 +30,10 @@ export const migrations = [
     up: migration_20261115_133000_add_returns_and_refunds.up,
     down: migration_20261115_133000_add_returns_and_refunds.down,
     name: '20261115_133000_add_returns_and_refunds',
+  },
+  {
+    up: migration_20261115_135000_add_order_payment_link.up,
+    down: migration_20261115_135000_add_order_payment_link.down,
+    name: '20261115_135000_add_order_payment_link',
   },
 ];
