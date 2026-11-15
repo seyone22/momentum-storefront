@@ -81,6 +81,87 @@ export async function createPaymentsLkCheckout(
   return data;
 }
 
+export interface CreateRefundParams {
+  paymentId: string;
+  amountLkr: number;
+  reason?: string;
+  idempotencyKey?: string;
+}
+
+export interface PaymentsLkRefundResponse {
+  object?: string;
+  id?: string;
+  paymentId?: string;
+  amountCents?: number;
+  status?: string;
+  error?: string;
+  message?: string;
+}
+
+/**
+ * Initiates a full or partial refund via Payments.lk POST /v1/refunds.
+ */
+export async function createPaymentsLkRefund(
+  params: CreateRefundParams
+): Promise<PaymentsLkRefundResponse> {
+  const secretKey = process.env.PAYMENTS_LK_SECRET_KEY;
+  if (!secretKey) {
+    throw new Error("Missing PAYMENTS_LK_SECRET_KEY in environment variables.");
+  }
+
+  const amountCents = Math.round(params.amountLkr * 100);
+  const response = await fetch(`${PAYMENTS_LK_API_URL}/refunds`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${secretKey}`,
+      "Idempotency-Key": params.idempotencyKey || `refund_${params.paymentId}_${amountCents}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      paymentId: params.paymentId,
+      amountCents,
+      reason: params.reason || "customer_request",
+    }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(
+      data.message || data.error || `Payments.lk refund API responded with status ${response.status}`
+    );
+  }
+
+  return data;
+}
+
+/**
+ * Cancels a pending Payments.lk refund before settlement.
+ */
+export async function cancelPaymentsLkRefund(refundId: string): Promise<PaymentsLkRefundResponse> {
+  const secretKey = process.env.PAYMENTS_LK_SECRET_KEY;
+  if (!secretKey) {
+    throw new Error("Missing PAYMENTS_LK_SECRET_KEY in environment variables.");
+  }
+
+  const response = await fetch(`${PAYMENTS_LK_API_URL}/refunds/${refundId}/cancel`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${secretKey}`,
+      "Idempotency-Key": `cancel_refund_${refundId}_${Date.now()}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(
+      data.message || data.error || `Payments.lk refund cancel responded with status ${response.status}`
+    );
+  }
+
+  return data;
+}
+
 /**
  * Validates a webhook payload received from Payments.lk using HMAC-SHA256.
  * Supports `t=<unix_ts>,v1=<hex>` (timestamped) and raw/prefixed hex signatures.

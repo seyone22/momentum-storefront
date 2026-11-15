@@ -8,6 +8,7 @@ import { Users } from './src/collections/Users';
 import { Products } from './src/collections/Products';
 import { Orders } from './src/collections/Orders';
 import { Media } from './src/collections/Media';
+import { Returns } from './src/collections/Returns';
 import { migrations } from './src/migrations';
 
 const filename = fileURLToPath(import.meta.url);
@@ -20,7 +21,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Products, Orders, Media],
+  collections: [Users, Products, Orders, Media, Returns],
   plugins: [
     ...(process.env.S3_BUCKET
       ? [

@@ -42,16 +42,43 @@ export async function GET(req: NextRequest) {
     }
 
     const doc = result.docs[0] as unknown as Record<string, unknown>;
+
+    const rmaResults = await payload.find({
+      collection: "returns",
+      where: {
+        order: {
+          equals: Number(doc.id),
+        },
+      },
+      sort: "-createdAt",
+      limit: 10,
+    });
+
+    const returns = rmaResults.docs.map((r) => {
+      const rDoc = r as unknown as Record<string, unknown>;
+      return {
+        rmaNumber: rDoc.rmaNumber,
+        type: rDoc.type,
+        status: rDoc.status,
+        refundStatus: rDoc.refundStatus || "none",
+        refundAmountLkr: Number(rDoc.refundAmountLkr ?? 0),
+        pickupTrackingNumber: rDoc.pickupTrackingNumber || null,
+        createdAt: rDoc.createdAt,
+      };
+    });
+
     return NextResponse.json({
       orderNumber: doc.orderNumber,
       customerName: doc.customerName,
       city: doc.city,
       totalLkr: doc.totalLkr,
+      refundedLkr: Number(doc.refundedLkr ?? 0),
       paymentRail: doc.paymentRail,
       paymentStatus: doc.paymentStatus,
       fulfillmentStatus: doc.fulfillmentStatus,
       promptTrackingNumber: doc.promptTrackingNumber || null,
       items: Array.isArray(doc.items) ? doc.items : [],
+      returns,
       createdAt: doc.createdAt,
     });
   } catch (error: unknown) {

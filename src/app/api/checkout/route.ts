@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
     const orderNumber = `MMTM-${Math.floor(100000 + Math.random() * 900000)}`;
 
     // Persist order in Payload CMS (PostgreSQL)
-    await payload.create({
+    const createdOrder = await payload.create({
       collection: "orders",
       data: {
         orderNumber,
@@ -174,6 +174,16 @@ export async function POST(req: NextRequest) {
       returnUrl: `${origin}/order/confirmed/${orderNumber}`,
       cancelUrl: `${origin}/checkout`,
     });
+
+    if (checkout.id) {
+      await payload.update({
+        collection: "orders",
+        id: createdOrder.id,
+        data: {
+          paymentsLkCheckoutId: String(checkout.id),
+        },
+      });
+    }
 
     return NextResponse.json({
       orderNumber,

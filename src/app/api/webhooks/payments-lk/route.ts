@@ -53,11 +53,75 @@ export async function POST(req: NextRequest) {
       rawStatus,
     });
 
+    const payload = await getPayload({ config: configPromise });
+
+    // Handle Refund Lifecycle Events (refund.succeeded, refund.failed, refund.canceled)
+    if (rawStatus.startsWith("refund.")) {
+      const refundId = String(nestedData?.id || eventData.id || "").trim();
+      if (!refundId) {
+        return NextResponse.json({ received: true, ignored: "No refundId in payload" });
+      }
+
+      const matchedReturns = await payload.find({
+        collection: "returns",
+        where: { paymentsLkRefundId: { equals: refundId } },
+        limit: 1,
+      });
+
+      if (matchedReturns.docs.length === 0) {
+        return NextResponse.json({ received: true, ignored: "No matching RMA for refundId" });
+      }
+
+      const rma = matchedReturns.docs[0] as unknown as Record<string, unknown>;
+      const nextRefundStatus = rawStatus.includes("succeeded")
+        ? "succeeded"
+        : rawStatus.includes("canceled")
+          ? "canceled"
+          : "failed";
+
+      await payload.update({
+        collection: "returns",
+        id: Number(rma.id),
+        data: {
+          refundStatus: nextRefundStatus,
+          ...(nextRefundStatus === "succeeded" ? { status: "completed" } : {}),
+        },
+      });
+
+      if (nextRefundStatus === "succeeded" && rma.refundStatus !== "succeeded") {
+        const orderRel = rma.order as Record<string, unknown> | number | string | undefined;
+        const orderId =
+          typeof orderRel === "object" && orderRel !== null ? Number(orderRel.id) : Number(orderRel);
+
+        if (!Number.isNaN(orderId) && orderId > 0) {
+          const orderDoc = (await payload.findByID({
+            collection: "orders",
+            id: orderId,
+          })) as unknown as Record<string, unknown>;
+
+          const totalLkr = Number(orderDoc.totalLkr ?? 0);
+          const prevRefunded = Number(orderDoc.refundedLkr ?? 0);
+          const refundAmt = Number(rma.refundAmountLkr ?? 0);
+          const newRefunded = Math.min(totalLkr, prevRefunded + refundAmt);
+
+          await payload.update({
+            collection: "orders",
+            id: orderId,
+            data: {
+              refundedLkr: newRefunded,
+              paymentStatus: newRefunded >= totalLkr ? "refunded" : "partially_refunded",
+            },
+          });
+        }
+      }
+
+      return NextResponse.json({ received: true, refundId, status: nextRefundStatus });
+    }
+
     if (!orderNumber) {
       return NextResponse.json({ received: true, ignored: "No orderId in payload" });
     }
 
-    const payload = await getPayload({ config: configPromise });
     const found = await payload.find({
       collection: "orders",
       where: {
@@ -81,12 +145,21 @@ export async function POST(req: NextRequest) {
     );
 
     if (isSuccess && order.paymentStatus !== "paid") {
+      const paymentObj =
+        nestedData?.payment && typeof nestedData.payment === "object"
+          ? (nestedData.payment as Record<string, unknown>)
+          : undefined;
+      const paymentsLkPaymentId = String(
+        nestedData?.paymentId || paymentObj?.id || nestedData?.id || ""
+      ).trim();
+
       await payload.update({
         collection: "orders",
         id: Number(order.id),
         data: {
           paymentStatus: "paid",
           fulfillmentStatus: "payment_verified",
+          ...(paymentsLkPaymentId ? { paymentsLkPaymentId } : {}),
         },
       });
 

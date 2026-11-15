@@ -51,8 +51,33 @@ export const Orders: CollectionConfig = {
     {
       name: 'paymentStatus',
       type: 'select',
-      options: ['pending', 'paid', 'failed', 'refunded'],
+      options: ['pending', 'paid', 'failed', 'partially_refunded', 'refunded'],
       defaultValue: 'pending',
+    },
+    {
+      name: 'paymentsLkCheckoutId',
+      type: 'text',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'paymentsLkPaymentId',
+      type: 'text',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'refundedLkr',
+      type: 'number',
+      defaultValue: 0,
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+      },
     },
     {
       name: 'fulfillmentStatus',
