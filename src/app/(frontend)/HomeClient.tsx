@@ -1,13 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import AnnouncementBar from "@/components/storefront/AnnouncementBar";
 import Navbar from "@/components/storefront/Navbar";
 import HeroDrop from "@/components/storefront/HeroDrop";
 import ProductCard from "@/components/storefront/ProductCard";
 import Footer from "@/components/storefront/Footer";
-import CartDrawer, { CartItem } from "@/components/storefront/CartDrawer";
 import { Product } from "@/lib/products";
 import { ArrowRight } from "lucide-react";
 
@@ -16,19 +14,10 @@ interface HomeClientProps {
 }
 
 export default function HomeClient({ products }: HomeClientProps) {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-
-  const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
-
-  const handleRemoveFromCart = (id: string, size: string) => {
-    setCartItems(cartItems.filter((i) => !(i.id === id && i.size === size)));
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-[#fbfbf9]">
       <AnnouncementBar />
-      <Navbar cartCount={cartCount} onOpenCart={() => setIsCartOpen(true)} />
+      <Navbar />
 
       <main className="flex-1">
         <HeroDrop />
@@ -63,13 +52,6 @@ export default function HomeClient({ products }: HomeClientProps) {
       </main>
 
       <Footer />
-
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        items={cartItems}
-        onRemoveItem={handleRemoveFromCart}
-      />
     </div>
   );
 }

@@ -3,13 +3,18 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ShoppingBag } from "lucide-react";
+import { useCart } from "@/context/CartContext";
 
 interface NavbarProps {
   cartCount?: number;
   onOpenCart?: () => void;
 }
 
-export default function Navbar({ cartCount = 0, onOpenCart }: NavbarProps) {
+export default function Navbar({ cartCount, onOpenCart }: NavbarProps) {
+  const cart = useCart();
+  const displayCount = cartCount ?? cart.cartCount;
+  const handleOpenCart = onOpenCart ?? cart.openCart;
+
   return (
     <header className="sticky top-0 z-40 bg-[#fbfbf9]/95 backdrop-blur-md border-b border-[#e5e5e0]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 grid grid-cols-3 items-center">
@@ -44,13 +49,13 @@ export default function Navbar({ cartCount = 0, onOpenCart }: NavbarProps) {
         {/* Right Cart Trigger */}
         <div className="justify-self-end flex items-center">
           <button
-            onClick={onOpenCart}
+            onClick={handleOpenCart}
             className="flex items-center space-x-2 text-neutral-900 hover:opacity-75 transition-opacity p-2 relative"
             aria-label="Shopping Bag"
           >
             <ShoppingBag size={18} strokeWidth={1.5} />
-            {cartCount > 0 && (
-              <span className="text-[11px] font-mono font-medium">({cartCount})</span>
+            {displayCount > 0 && (
+              <span className="text-[11px] font-mono font-medium">({displayCount})</span>
             )}
           </button>
         </div>

@@ -3,32 +3,70 @@
 import { useState } from "react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
-import { Search, Package, Clock, CheckCircle2, Truck } from "lucide-react";
+import { formatPriceLKR } from "@/lib/utils";
+import { Search, Package, Clock, CheckCircle2, Truck, Loader2 } from "lucide-react";
+
+interface TrackedOrder {
+  orderNumber: string;
+  customerName: string;
+  city: string;
+  totalLkr: number;
+  paymentRail: string;
+  paymentStatus: string;
+  fulfillmentStatus: string;
+  promptTrackingNumber: string | null;
+  items: Array<{
+    productName: string;
+    size: string;
+    quantity: number;
+    unitPriceLkr: number;
+  }>;
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  pre_order_placed: "Pre-Order Placed",
+  payment_verified: "Payment Verified — Queued",
+  in_production: "In Handcrafted Production",
+  dispatched: "Dispatched via Prompt Xpress",
+};
 
 export default function TrackOrderPage() {
   const [query, setQuery] = useState("");
-  const [result, setResult] = useState<any | null>(null);
+  const [result, setResult] = useState<TrackedOrder | null>(null);
   const [searched, setSearched] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSearched(true);
+    if (!query.trim()) return;
 
-    if (query.trim().toUpperCase().includes("MMTM") || query.length >= 7) {
-      setResult({
-        orderId: query.trim().toUpperCase(),
-        product: "The Head Turner Wide Leg",
-        size: "28",
-        customer: "Sashini Perera",
-        status: "in_production",
-        statusLabel: "In Handcrafted Production",
-        courier: "Prompt Xpress (Tracking pending handover)",
-        dispatchWindow: "2nd Week of December 2026",
-      });
-    } else {
+    setLoading(true);
+    setSearched(false);
+
+    try {
+      const res = await fetch(`/api/orders/track?q=${encodeURIComponent(query.trim())}`);
+      if (res.ok) {
+        const data = await res.json();
+        setResult(data);
+      } else {
+        setResult(null);
+      }
+    } catch {
       setResult(null);
+    } finally {
+      setLoading(false);
+      setSearched(true);
     }
   };
+
+  const stepIndex =
+    result?.fulfillmentStatus === "dispatched"
+      ? 3
+      : result?.fulfillmentStatus === "in_production"
+        ? 2
+        : result?.fulfillmentStatus === "payment_verified"
+          ? 1
+          : 0;
 
   return (
     <div className="min-h-screen flex flex-col bg-[#fbfbf9]">
@@ -43,7 +81,7 @@ export default function TrackOrderPage() {
             Track Pre-Order
           </h1>
           <p className="text-xs text-neutral-600 mt-2">
-            Enter your order reference code (e.g. MMTM-10294) or mobile phone number to view live garment status.
+            Enter your order reference code (e.g. MMTM-102945) or mobile phone number to view live garment status.
           </p>
         </div>
 
@@ -54,14 +92,15 @@ export default function TrackOrderPage() {
             required
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="e.g. MMTM-48921 or 077XXXXXXX"
+            placeholder="e.g. MMTM-489210 or 077XXXXXXX"
             className="flex-1 text-xs p-3.5 border border-neutral-300 rounded-xs focus:border-black focus:outline-none uppercase font-mono"
           />
           <button
             type="submit"
-            className="bg-[#111111] hover:bg-black text-white text-xs uppercase tracking-wider font-semibold px-6 rounded-xs transition-all flex items-center gap-2"
+            disabled={loading}
+            className="bg-[#111111] hover:bg-black text-white text-xs uppercase tracking-wider font-semibold px-6 rounded-xs transition-all flex items-center gap-2 disabled:opacity-70"
           >
-            <Search size={14} />
+            {loading ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
             <span>Lookup</span>
           </button>
         </form>
@@ -76,70 +115,94 @@ export default function TrackOrderPage() {
                     <span className="text-[10px] uppercase tracking-widest text-neutral-400 block">
                       Order Reference
                     </span>
-                    <span className="font-mono font-bold text-lg text-black">{result.orderId}</span>
+                    <span className="font-mono font-bold text-lg text-black">{result.orderNumber}</span>
                   </div>
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold uppercase tracking-wider rounded-xs">
                     <Clock size={13} />
-                    <span>{result.statusLabel}</span>
+                    <span>
+                      {STATUS_LABELS[result.fulfillmentStatus] || result.fulfillmentStatus}
+                    </span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div>
                     <span className="text-neutral-500 uppercase tracking-wider text-[10px] block">
-                      Piece &amp; Selected Size
+                      Items Ordered
+                    </span>
+                    <div className="font-semibold text-black mt-0.5 space-y-1">
+                      {result.items.length > 0 ? (
+                        result.items.map((item, idx) => (
+                          <div key={idx}>
+                            {item.productName} (Size {item.size}) &times; {item.quantity}
+                          </div>
+                        ))
+                      ) : (
+                        <span>Momentum Pre-Order</span>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-neutral-500 uppercase tracking-wider text-[10px] block">
+                      Total &amp; Payment
                     </span>
                     <span className="font-semibold text-black mt-0.5 block">
-                      {result.product} (Size {result.size})
+                      {formatPriceLKR(result.totalLkr)} ({result.paymentStatus.toUpperCase()})
                     </span>
                   </div>
                   <div>
                     <span className="text-neutral-500 uppercase tracking-wider text-[10px] block">
-                      Estimated Dispatch Window
+                      Customer &amp; Destination
                     </span>
-                    <span className="font-semibold text-black mt-0.5 block">
-                      {result.dispatchWindow}
+                    <span className="font-medium text-neutral-800 mt-0.5 block">
+                      {result.customerName} — {result.city}
                     </span>
                   </div>
                   <div>
                     <span className="text-neutral-500 uppercase tracking-wider text-[10px] block">
-                      Fulfillment Partner
+                      Courier Status
                     </span>
-                    <span className="text-neutral-800 mt-0.5 block flex items-center gap-1.5">
-                      <Truck size={14} />
-                      {result.courier}
+                    <span className="font-medium text-neutral-800 mt-0.5 block">
+                      {result.promptTrackingNumber
+                        ? `Prompt Xpress #${result.promptTrackingNumber}`
+                        : "Prompt Xpress (Tracking pending handover)"}
                     </span>
                   </div>
                 </div>
 
-                {/* Progress Steps */}
-                <div className="pt-6 border-t border-neutral-200">
-                  <span className="text-[10px] uppercase tracking-widest text-neutral-400 block mb-4">
-                    Lifecycle Timeline
-                  </span>
-                  <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-medium uppercase tracking-wider">
-                    <div className="space-y-1.5 text-black">
-                      <div className="h-1 bg-black rounded-full" />
-                      <span>Pre-Order Placed</span>
-                    </div>
-                    <div className="space-y-1.5 text-black">
-                      <div className="h-1 bg-black rounded-full" />
-                      <span>Payment Verified</span>
-                    </div>
-                    <div className="space-y-1.5 text-blue-600">
-                      <div className="h-1 bg-blue-600 rounded-full animate-pulse" />
-                      <span>In Production</span>
-                    </div>
-                    <div className="space-y-1.5 text-neutral-300">
-                      <div className="h-1 bg-neutral-200 rounded-full" />
-                      <span>Dispatched</span>
-                    </div>
+                {/* Visual Step Progress */}
+                <div className="pt-4 border-t border-neutral-100">
+                  <div className="flex items-center justify-between text-[11px] font-medium text-neutral-600 mb-2">
+                    <span className={`flex items-center gap-1 ${stepIndex >= 0 ? "text-emerald-700" : ""}`}>
+                      <CheckCircle2 size={14} /> Placed
+                    </span>
+                    <span className={`flex items-center gap-1 ${stepIndex >= 2 ? "text-amber-700 font-bold" : ""}`}>
+                      <Package size={14} /> Production
+                    </span>
+                    <span className={`flex items-center gap-1 ${stepIndex >= 3 ? "text-emerald-700 font-bold" : "text-neutral-400"}`}>
+                      <Truck size={14} /> Dispatched
+                    </span>
+                  </div>
+                  <div className="w-full bg-neutral-200 h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className="bg-black h-full transition-all"
+                      style={{
+                        width:
+                          stepIndex === 3
+                            ? "100%"
+                            : stepIndex === 2
+                              ? "66%"
+                              : stepIndex === 1
+                                ? "40%"
+                                : "20%",
+                      }}
+                    />
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="p-8 bg-neutral-50 border border-neutral-200 text-center rounded-xs text-xs text-neutral-600">
-                No active pre-order found for "<strong>{query}</strong>". Please verify your reference number or contact our WhatsApp concierge.
+              <div className="text-center p-8 bg-white border border-[#e5e5e0] rounded-xs text-xs text-neutral-600">
+                No active pre-order found matching <strong>&ldquo;{query}&rdquo;</strong>. Please double-check your order code or reach out on WhatsApp.
               </div>
             )}
           </div>

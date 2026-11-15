@@ -1,7 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
+import { useCart } from "@/context/CartContext";
+import { formatPriceLKR } from "@/lib/utils";
 import Link from "next/link";
 import { CheckCircle2, Package, Calendar, ArrowRight, MessageCircle } from "lucide-react";
 
@@ -9,7 +12,39 @@ interface OrderConfirmedClientProps {
   orderId: string;
 }
 
+interface OrderSummary {
+  orderNumber: string;
+  customerName: string;
+  city: string;
+  totalLkr: number;
+  paymentStatus: string;
+  fulfillmentStatus: string;
+  items: Array<{
+    productName: string;
+    size: string;
+    quantity: number;
+    unitPriceLkr: number;
+  }>;
+}
+
 export default function OrderConfirmedClient({ orderId }: OrderConfirmedClientProps) {
+  const { clearCart } = useCart();
+  const [order, setOrder] = useState<OrderSummary | null>(null);
+
+  useEffect(() => {
+    clearCart();
+    fetch(`/api/orders/track?orderNumber=${encodeURIComponent(orderId)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && data.orderNumber) {
+          setOrder(data);
+        }
+      })
+      .catch(() => {
+        // Ignore lookup failure on confirmation screen
+      });
+  }, [orderId, clearCart]);
+
   return (
     <div className="min-h-screen flex flex-col bg-[#fbfbf9]">
       <Navbar />
@@ -26,15 +61,34 @@ export default function OrderConfirmedClient({ orderId }: OrderConfirmedClientPr
           Allocation Reserved
         </h1>
         <p className="text-xs sm:text-sm text-neutral-600 max-w-md mx-auto mt-3">
-          Thank you for joining the Momentum inaugural drop. Your denim piece has entered the production schedule.
+          Thank you for joining the Momentum inaugural drop. Your order has been recorded and queued for production.
         </p>
 
         {/* Order Reference Box */}
         <div className="my-8 p-6 bg-white border border-[#e5e5e0] rounded-xs shadow-xs text-left max-w-lg mx-auto space-y-4">
           <div className="flex justify-between items-baseline pb-3 border-b border-neutral-200">
             <span className="text-xs uppercase tracking-wider text-neutral-500">Order Reference</span>
-            <span className="font-mono font-bold text-sm text-black">#{orderId}</span>
+            <span className="font-mono font-bold text-sm text-black">#{order?.orderNumber || orderId}</span>
           </div>
+
+          {order && order.items.length > 0 && (
+            <div className="pb-3 border-b border-neutral-200 space-y-2">
+              {order.items.map((item, idx) => (
+                <div key={idx} className="flex justify-between text-xs">
+                  <span className="text-neutral-800">
+                    {item.productName} (Size {item.size}) &times; {item.quantity}
+                  </span>
+                  <span className="font-mono text-black">
+                    {formatPriceLKR(item.unitPriceLkr * item.quantity)}
+                  </span>
+                </div>
+              ))}
+              <div className="flex justify-between text-xs font-semibold pt-2 border-t border-neutral-100">
+                <span>Total</span>
+                <span className="font-mono">{formatPriceLKR(order.totalLkr)}</span>
+              </div>
+            </div>
+          )}
 
           <div className="flex items-start gap-3 text-xs text-neutral-700">
             <Calendar size={16} className="text-neutral-500 mt-0.5 flex-shrink-0" />

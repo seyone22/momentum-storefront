@@ -5,7 +5,6 @@ import AnnouncementBar from "@/components/storefront/AnnouncementBar";
 import Navbar from "@/components/storefront/Navbar";
 import ProductCard from "@/components/storefront/ProductCard";
 import Footer from "@/components/storefront/Footer";
-import CartDrawer, { CartItem } from "@/components/storefront/CartDrawer";
 import { Product } from "@/lib/products";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 
@@ -23,8 +22,6 @@ export default function ProductsCatalogClient({ products }: ProductsCatalogClien
   const [selectedSize, setSelectedSize] = useState<string>("All");
   const [onlyInStock, setOnlyInStock] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("featured");
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
 
   const categories = useMemo(() => {
     const unique = Array.from(new Set(products.map((p) => p.category).filter(Boolean)));
@@ -99,15 +96,10 @@ export default function ProductsCatalogClient({ products }: ProductsCatalogClien
     setSortBy("featured");
   };
 
-  const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
-  const handleRemoveFromCart = (id: string, size: string) => {
-    setCartItems(cartItems.filter((i) => !(i.id === id && i.size === size)));
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-[#fbfbf9]">
       <AnnouncementBar />
-      <Navbar cartCount={cartCount} onOpenCart={() => setIsCartOpen(true)} />
+      <Navbar />
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-14">
         {/* Page Header */}
@@ -283,13 +275,6 @@ export default function ProductsCatalogClient({ products }: ProductsCatalogClien
       </main>
 
       <Footer />
-
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        items={cartItems}
-        onRemoveItem={handleRemoveFromCart}
-      />
     </div>
   );
 }

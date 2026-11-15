@@ -8,7 +8,7 @@ import AnnouncementBar from "@/components/storefront/AnnouncementBar";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import SizeGuideModal from "@/components/storefront/SizeGuideModal";
-import CartDrawer, { CartItem } from "@/components/storefront/CartDrawer";
+import { useCart } from "@/context/CartContext";
 import { Ruler, ArrowLeft } from "lucide-react";
 
 interface ProductDetailClientProps {
@@ -16,50 +16,34 @@ interface ProductDetailClientProps {
 }
 
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
-  const [selectedSize, setSelectedSize] = useState<string>("28");
+  const defaultSize =
+    product.variants.find((v) => v.inStock && v.stock > 0)?.size ??
+    product.variants[0]?.size ??
+    "28";
+  const [selectedSize, setSelectedSize] = useState<string>(defaultSize);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const { addItem } = useCart();
 
   const selectedVariant = product.variants.find((v) => v.size === selectedSize);
   const isOutOfStock = !selectedVariant || selectedVariant.stock <= 0;
 
   const handleAddToCart = () => {
     if (isOutOfStock) return;
-    const existing = cartItems.find((i) => i.id === product.id && i.size === selectedSize);
-    if (existing) {
-      setCartItems(
-        cartItems.map((i) =>
-          i.id === product.id && i.size === selectedSize
-            ? { ...i, quantity: i.quantity + 1 }
-            : i
-        )
-      );
-    } else {
-      setCartItems([
-        ...cartItems,
-        {
-          id: product.id,
-          name: product.name,
-          size: selectedSize,
-          priceLkr: product.priceLkr,
-          quantity: 1,
-        },
-      ]);
-    }
-    setIsCartOpen(true);
+    addItem({
+      id: product.id,
+      slug: product.slug,
+      name: product.name,
+      size: selectedSize,
+      priceLkr: product.priceLkr,
+      image: product.featuredImage?.url,
+      quantity: 1,
+    });
   };
-
-  const handleRemoveFromCart = (id: string, size: string) => {
-    setCartItems(cartItems.filter((i) => !(i.id === id && i.size === size)));
-  };
-
-  const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#fbfbf9]">
       <AnnouncementBar />
-      <Navbar cartCount={cartCount} onOpenCart={() => setIsCartOpen(true)} />
+      <Navbar />
 
       <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
         <div className="mb-8">
@@ -206,13 +190,6 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       <SizeGuideModal
         isOpen={isSizeGuideOpen}
         onClose={() => setIsSizeGuideOpen(false)}
-      />
-
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        items={cartItems}
-        onRemoveItem={handleRemoveFromCart}
       />
     </div>
   );

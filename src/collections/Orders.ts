@@ -65,5 +65,37 @@ export const Orders: CollectionConfig = {
       type: 'text',
       label: 'Prompt Xpress Tracking #',
     },
+    {
+      name: 'items',
+      type: 'array',
+      label: 'Ordered Items',
+      fields: [
+        {
+          name: 'productId',
+          type: 'text',
+        },
+        {
+          name: 'productName',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'size',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'quantity',
+          type: 'number',
+          required: true,
+          defaultValue: 1,
+        },
+        {
+          name: 'unitPriceLkr',
+          type: 'number',
+          required: true,
+        },
+      ],
+    },
   ],
 };
