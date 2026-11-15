@@ -15,11 +15,14 @@ export default function Navbar({ cartCount = 0, onOpenCart }: NavbarProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
         {/* Left Links */}
-        <nav className="flex items-center space-x-8 text-[11px] uppercase tracking-[0.2em] font-medium text-neutral-600">
+        <nav className="flex items-center space-x-6 sm:space-x-8 text-[11px] uppercase tracking-[0.2em] font-medium text-neutral-600">
           <Link href="/#collection" className="hover:text-black transition-colors">
             Drop 01
           </Link>
-          <Link href="/track" className="hover:text-black transition-colors">
+          <Link href="/products" className="hover:text-black transition-colors">
+            Shop All
+          </Link>
+          <Link href="/track" className="hidden sm:inline-block hover:text-black transition-colors">
             Track Order
           </Link>
         </nav>

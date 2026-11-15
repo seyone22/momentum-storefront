@@ -45,6 +45,43 @@ export const Products: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'featuredOnHome',
+      type: 'checkbox',
+      label: 'Feature on Landing Page',
+      defaultValue: true,
+    },
+    {
+      name: 'featuredImage',
+      type: 'upload',
+      relationTo: 'media',
+      label: 'Primary Product Photo',
+    },
+    {
+      name: 'gallery',
+      type: 'array',
+      label: 'Additional Photos',
+      fields: [
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          required: true,
+        },
+      ],
+    },
+    {
+      name: 'details',
+      type: 'array',
+      label: 'Garment Specifications',
+      fields: [
+        {
+          name: 'item',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
+    {
       name: 'variants',
       type: 'array',
       fields: [

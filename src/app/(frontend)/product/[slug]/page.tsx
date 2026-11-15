@@ -1,12 +1,8 @@
-import { PRODUCTS } from "@/lib/products";
+import { getProductBySlug } from "@/lib/payload-products";
 import { notFound } from "next/navigation";
 import ProductDetailClient from "./ProductDetailClient";
 
-export function generateStaticParams() {
-  return PRODUCTS.map((product) => ({
-    slug: product.slug,
-  }));
-}
+export const dynamic = "force-dynamic";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -14,7 +10,7 @@ interface ProductPageProps {
 
 export default async function ProductDetailPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const product = PRODUCTS.find((p) => p.slug === slug);
+  const product = await getProductBySlug(slug);
 
   if (!product) {
     notFound();

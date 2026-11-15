@@ -74,17 +74,43 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
           
-          {/* Minimal Silhouette Box */}
-          <div className="md:col-span-6 aspect-[3/4] bg-[#f4f4f0] border border-[#e5e5e0] flex flex-col items-center justify-center p-8 text-center">
-            <span className="text-[11px] uppercase tracking-[0.25em] text-neutral-400 font-medium">
-              Momentum Denim
-            </span>
-            <h2 className="font-editorial text-3xl uppercase tracking-wider text-black mt-2">
-              {product.name}
-            </h2>
-            <span className="text-xs font-mono text-neutral-500 mt-2">
-              Official Lookbook Imagery Pending Studio Handoff
-            </span>
+          {/* Product Image / Minimal Silhouette Box */}
+          <div className="md:col-span-6 space-y-4">
+            {product.featuredImage?.url ? (
+              <div className="aspect-[3/4] bg-[#f4f4f0] border border-[#e5e5e0] overflow-hidden">
+                <img
+                  src={product.featuredImage.url}
+                  alt={product.featuredImage.alt || product.name}
+                  className="w-full h-full object-cover object-center"
+                />
+              </div>
+            ) : (
+              <div className="aspect-[3/4] bg-[#f4f4f0] border border-[#e5e5e0] flex flex-col items-center justify-center p-8 text-center">
+                <span className="text-[11px] uppercase tracking-[0.25em] text-neutral-400 font-medium">
+                  Momentum Denim
+                </span>
+                <h2 className="font-editorial text-3xl uppercase tracking-wider text-black mt-2">
+                  {product.name}
+                </h2>
+                <span className="text-xs font-mono text-neutral-500 mt-2">
+                  Official Lookbook Imagery Pending Studio Handoff
+                </span>
+              </div>
+            )}
+
+            {product.gallery && product.gallery.length > 0 && (
+              <div className="grid grid-cols-3 gap-3">
+                {product.gallery.map((img, idx) => (
+                  <div key={idx} className="aspect-[3/4] bg-[#f4f4f0] border border-[#e5e5e0] overflow-hidden">
+                    <img
+                      src={img.url}
+                      alt={img.alt || `${product.name} view ${idx + 1}`}
+                      className="w-full h-full object-cover object-center"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Sizing & Pre-Order Action Box */}

@@ -1,7 +1,13 @@
 export interface ProductVariant {
   size: '26' | '27' | '28' | '29' | '30' | '32';
+  sku?: string;
   stock: number;
   inStock: boolean;
+}
+
+export interface ProductMediaItem {
+  url: string;
+  alt: string;
 }
 
 export interface Product {
@@ -13,7 +19,11 @@ export interface Product {
   description: string;
   details: string[];
   fabric: string;
+  featuredOnHome?: boolean;
+  featuredImage?: ProductMediaItem | null;
+  gallery?: ProductMediaItem[];
   variants: ProductVariant[];
+  createdAt?: string;
 }
 
 export const PRODUCTS: Product[] = [
