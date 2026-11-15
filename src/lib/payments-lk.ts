@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 export interface CustomerInfo {
   name: string;
   email: string;
@@ -80,14 +82,66 @@ export async function createPaymentsLkCheckout(
 }
 
 /**
- * Validates a webhook payload received from Payments.lk
+ * Validates a webhook payload received from Payments.lk using HMAC-SHA256.
+ * Supports `t=<unix_ts>,v1=<hex>` (timestamped) and raw/prefixed hex signatures.
  */
 export function verifyWebhookSignature(
   rawBody: string,
   signatureHeader: string | null
 ): boolean {
-  if (!signatureHeader && process.env.NODE_ENV === "development") {
-    return true;
+  const secret = process.env.PAYMENTS_LK_WEBHOOK_SECRET;
+
+  if (!secret) {
+    console.warn("PAYMENTS_LK_WEBHOOK_SECRET is not set; skipping webhook signature check.");
+    return process.env.NODE_ENV !== "production";
   }
-  return true;
+
+  if (!signatureHeader || !signatureHeader.trim()) {
+    return false;
+  }
+
+  const safeCompareHex = (aHex: string, bHex: string): boolean => {
+    const a = Buffer.from(aHex.trim().toLowerCase(), "utf8");
+    const b = Buffer.from(bHex.trim().toLowerCase(), "utf8");
+    if (a.length !== b.length || a.length === 0) return false;
+    return crypto.timingSafeEqual(a, b);
+  };
+
+  // Format 1: t=1745488800,v1=abc123... (Stripe / Payments.lk signed event header)
+  const parts = signatureHeader.split(",").map((p) => p.trim());
+  const timestampPart = parts.find((p) => p.startsWith("t="));
+  const v1Parts = parts.filter((p) => p.startsWith("v1=")).map((p) => p.slice(3));
+
+  if (timestampPart && v1Parts.length > 0) {
+    const timestamp = timestampPart.slice(2);
+    const tsNum = Number(timestamp);
+    if (!Number.isFinite(tsNum)) return false;
+
+    // Allow 5-minute clock tolerance (supports seconds or milliseconds)
+    const tsSeconds = tsNum > 1e12 ? Math.floor(tsNum / 1000) : tsNum;
+    const nowSeconds = Math.floor(Date.now() / 1000);
+    if (Math.abs(nowSeconds - tsSeconds) > 300) {
+      return false;
+    }
+
+    const signedPayload = `${timestamp}.${rawBody}`;
+    const expected = crypto
+      .createHmac("sha256", secret)
+      .update(signedPayload, "utf8")
+      .digest("hex");
+
+    return v1Parts.some((sig) => safeCompareHex(sig, expected));
+  }
+
+  // Format 2: raw hex or sha256=<hex>
+  const normalizedSig = signatureHeader.startsWith("sha256=")
+    ? signatureHeader.slice(7)
+    : signatureHeader;
+
+  const expectedRaw = crypto
+    .createHmac("sha256", secret)
+    .update(rawBody, "utf8")
+    .digest("hex");
+
+  return safeCompareHex(normalizedSig, expectedRaw);
 }

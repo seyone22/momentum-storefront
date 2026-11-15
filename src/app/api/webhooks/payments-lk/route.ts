@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 import configPromise from "@payload-config";
+import { verifyWebhookSignature } from "@/lib/payments-lk";
 
 export async function POST(req: NextRequest) {
   try {
     const rawBody = await req.text();
     const signature =
-      req.headers.get("x-payable-signature") || req.headers.get("x-signature");
+      req.headers.get("payments-signature") ||
+      req.headers.get("x-payable-signature") ||
+      req.headers.get("x-signature");
+
+    if (!verifyWebhookSignature(rawBody, signature)) {
+      console.error("Invalid Payments.lk webhook signature");
+      return NextResponse.json({ error: "Invalid webhook signature" }, { status: 401 });
+    }
 
     let eventData: Record<string, unknown> = {};
     try {
