@@ -61,6 +61,8 @@ export const Orders: CollectionConfig = {
               name: doc.customerName ? String(doc.customerName) : null,
               city: doc.city ? String(doc.city) : null,
               externalId: String(doc.orderNumber || doc.id),
+              fbp: doc.fbp ? String(doc.fbp) : null,
+              fbc: doc.fbc ? String(doc.fbc) : null,
             },
             customData: {
               currency: 'LKR',
@@ -208,6 +210,78 @@ export const Orders: CollectionConfig = {
       name: 'capiPurchaseEventId',
       type: 'text',
       label: 'Meta CAPI Event ID',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'utmSource',
+      type: 'text',
+      label: 'UTM Source',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'utmMedium',
+      type: 'text',
+      label: 'UTM Medium',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'utmCampaign',
+      type: 'text',
+      label: 'UTM Campaign',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'utmContent',
+      type: 'text',
+      label: 'UTM Content',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'utmTerm',
+      type: 'text',
+      label: 'UTM Term',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'fbclid',
+      type: 'text',
+      label: 'Meta fbclid',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'fbp',
+      type: 'text',
+      label: 'Meta _fbp Cookie',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'fbc',
+      type: 'text',
+      label: 'Meta _fbc Cookie',
       admin: {
         readOnly: true,
         position: 'sidebar',

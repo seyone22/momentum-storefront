@@ -14,7 +14,7 @@ interface CheckoutItemInput {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { items, customer } = body as {
+    const { items, customer, attribution } = body as {
       items?: CheckoutItemInput[];
       customer?: {
         name?: string;
@@ -22,6 +22,16 @@ export async function POST(req: NextRequest) {
         phone?: string;
         address?: string;
         city?: string;
+      };
+      attribution?: {
+        utmSource?: string;
+        utmMedium?: string;
+        utmCampaign?: string;
+        utmContent?: string;
+        utmTerm?: string;
+        fbclid?: string;
+        fbp?: string;
+        fbc?: string;
       };
     };
 
@@ -132,6 +142,9 @@ export async function POST(req: NextRequest) {
 
     const orderNumber = `MMTM-${Math.floor(100000 + Math.random() * 900000)}`;
 
+    const fbpCookie = req.cookies.get("_fbp")?.value;
+    const fbcCookie = req.cookies.get("_fbc")?.value;
+
     // Persist order in Payload CMS (PostgreSQL)
     const createdOrder = await payload.create({
       collection: "orders",
@@ -147,6 +160,18 @@ export async function POST(req: NextRequest) {
         paymentStatus: "pending",
         fulfillmentStatus: "pre_order_placed",
         items: verifiedItems,
+        ...(attribution?.utmSource ? { utmSource: String(attribution.utmSource).slice(0, 200) } : {}),
+        ...(attribution?.utmMedium ? { utmMedium: String(attribution.utmMedium).slice(0, 200) } : {}),
+        ...(attribution?.utmCampaign ? { utmCampaign: String(attribution.utmCampaign).slice(0, 200) } : {}),
+        ...(attribution?.utmContent ? { utmContent: String(attribution.utmContent).slice(0, 200) } : {}),
+        ...(attribution?.utmTerm ? { utmTerm: String(attribution.utmTerm).slice(0, 200) } : {}),
+        ...(attribution?.fbclid ? { fbclid: String(attribution.fbclid).slice(0, 255) } : {}),
+        ...(attribution?.fbp || fbpCookie
+          ? { fbp: String(attribution?.fbp || fbpCookie).slice(0, 255) }
+          : {}),
+        ...(attribution?.fbc || fbcCookie
+          ? { fbc: String(attribution?.fbc || fbcCookie).slice(0, 255) }
+          : {}),
       },
     });
 

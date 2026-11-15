@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Product } from "@/lib/products";
+import { trackFunnelEvent } from "@/lib/meta-pixel";
 import { formatPriceLKR } from "@/lib/utils";
 import AnnouncementBar from "@/components/storefront/AnnouncementBar";
 import Navbar from "@/components/storefront/Navbar";
@@ -25,6 +26,19 @@ export default function ProductDetailClient({ product, pairings = [] }: ProductD
   const [selectedSize, setSelectedSize] = useState<string>(defaultSize);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const { addItem } = useCart();
+
+  useEffect(() => {
+    trackFunnelEvent({
+      eventName: "ViewContent",
+      customData: {
+        currency: "LKR",
+        value: product.priceLkr,
+        content_name: product.name,
+        content_type: "product",
+        contents: [{ id: product.slug || product.id, quantity: 1, item_price: product.priceLkr }],
+      },
+    });
+  }, [product.id, product.slug, product.name, product.priceLkr]);
 
   const selectedVariant = product.variants.find((v) => v.size === selectedSize);
   const isOutOfStock = !selectedVariant || selectedVariant.stock <= 0;

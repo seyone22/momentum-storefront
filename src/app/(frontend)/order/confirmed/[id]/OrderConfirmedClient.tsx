@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { useCart } from "@/context/CartContext";
 import { formatPriceLKR } from "@/lib/utils";
+import { trackFunnelEvent } from "@/lib/meta-pixel";
 import Link from "next/link";
-import { CheckCircle2, Package, Calendar, ArrowRight, MessageCircle } from "lucide-react";
+import { CheckCircle2, Package, Calendar, ArrowRight, MessageCircle, Printer, Users } from "lucide-react";
 
 interface OrderConfirmedClientProps {
   orderId: string;
@@ -17,8 +18,12 @@ interface OrderSummary {
   customerName: string;
   city: string;
   totalLkr: number;
+  paymentRail?: string;
   paymentStatus: string;
   fulfillmentStatus: string;
+  createdAt?: string;
+  whatsappGroupInviteUrl?: string | null;
+  whatsappGroupCtaText?: string;
   items: Array<{
     productName: string;
     size: string;
@@ -30,6 +35,7 @@ interface OrderSummary {
 export default function OrderConfirmedClient({ orderId }: OrderConfirmedClientProps) {
   const { clearCart } = useCart();
   const [order, setOrder] = useState<OrderSummary | null>(null);
+  const purchaseTrackedRef = useRef(false);
 
   useEffect(() => {
     clearCart();
@@ -38,6 +44,31 @@ export default function OrderConfirmedClient({ orderId }: OrderConfirmedClientPr
       .then((data) => {
         if (data && data.orderNumber) {
           setOrder(data);
+          if (!purchaseTrackedRef.current) {
+            purchaseTrackedRef.current = true;
+            trackFunnelEvent({
+              eventName: "Purchase",
+              eventId: `purchase_${data.orderNumber}`,
+              userData: {
+                name: data.customerName,
+                city: data.city,
+                externalId: data.orderNumber,
+              },
+              customData: {
+                currency: "LKR",
+                value: Number(data.totalLkr ?? 0),
+                order_id: data.orderNumber,
+                content_type: "product",
+                contents: Array.isArray(data.items)
+                  ? data.items.map((i: { productName: string; quantity: number; unitPriceLkr: number }) => ({
+                      id: i.productName,
+                      quantity: i.quantity,
+                      item_price: i.unitPriceLkr,
+                    }))
+                  : undefined,
+              },
+            });
+          }
         }
       })
       .catch(() => {
@@ -47,7 +78,9 @@ export default function OrderConfirmedClient({ orderId }: OrderConfirmedClientPr
 
   return (
     <div className="min-h-screen flex flex-col bg-[#fbfbf9]">
-      <Navbar />
+      <div className="print:hidden">
+        <Navbar />
+      </div>
 
       <main className="flex-1 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center w-full">
         <div className="inline-flex p-3 bg-emerald-50 border border-emerald-200 rounded-full text-emerald-600 mb-6">
@@ -64,11 +97,62 @@ export default function OrderConfirmedClient({ orderId }: OrderConfirmedClientPr
           Thank you for joining the Momentum inaugural drop. Your order has been recorded and queued for production.
         </p>
 
-        {/* Order Reference Box */}
-        <div className="my-8 p-6 bg-white border border-[#e5e5e0] rounded-xs shadow-xs text-left max-w-lg mx-auto space-y-4">
-          <div className="flex justify-between items-baseline pb-3 border-b border-neutral-200">
-            <span className="text-xs uppercase tracking-wider text-neutral-500">Order Reference</span>
-            <span className="font-mono font-bold text-sm text-black">#{order?.orderNumber || orderId}</span>
+        {/* Order Reference & Printable Receipt Box */}
+        <div className="my-8 p-6 bg-white border border-[#e5e5e0] rounded-xs shadow-xs text-left max-w-lg mx-auto space-y-4 print:shadow-none print:border-neutral-300">
+          <div className="flex justify-between items-start pb-3 border-b border-neutral-200">
+            <div>
+              <p className="font-editorial text-lg uppercase tracking-widest text-black">Momentum</p>
+              <p className="text-[10px] uppercase tracking-wider text-neutral-500">
+                Grace Hood Ventures (PVT) LTD &middot; Pre-Order Receipt
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="print:hidden inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-neutral-700 hover:text-black border border-neutral-300 px-2.5 py-1 rounded-xs transition-colors"
+            >
+              <Printer size={13} />
+              <span>Print Receipt</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 pb-3 border-b border-neutral-200 text-xs">
+            <div>
+              <span className="text-[10px] uppercase tracking-wider text-neutral-500 block">Order Reference</span>
+              <span className="font-mono font-bold text-sm text-black">#{order?.orderNumber || orderId}</span>
+            </div>
+            <div className="text-right">
+              <span className="text-[10px] uppercase tracking-wider text-neutral-500 block">Date</span>
+              <span className="text-neutral-800">
+                {order?.createdAt
+                  ? new Date(order.createdAt).toLocaleDateString("en-LK", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : new Date().toLocaleDateString("en-LK", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+              </span>
+            </div>
+            {order?.customerName && (
+              <div>
+                <span className="text-[10px] uppercase tracking-wider text-neutral-500 block">Customer</span>
+                <span className="text-neutral-800">
+                  {order.customerName} &middot; {order.city}
+                </span>
+              </div>
+            )}
+            {order?.paymentStatus && (
+              <div className="text-right">
+                <span className="text-[10px] uppercase tracking-wider text-neutral-500 block">Payment</span>
+                <span className="uppercase tracking-wider font-medium text-neutral-900">
+                  {order.paymentRail || "Online"} &middot; {order.paymentStatus}
+                </span>
+              </div>
+            )}
           </div>
 
           {order && order.items.length > 0 && (
@@ -107,7 +191,34 @@ export default function OrderConfirmedClient({ orderId }: OrderConfirmedClientPr
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+        {order?.whatsappGroupInviteUrl && (
+          <div className="print:hidden my-6 p-5 bg-emerald-50/70 border border-emerald-200 rounded-xs max-w-lg mx-auto text-left flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-emerald-100 text-emerald-700 rounded-full flex-shrink-0">
+                <Users size={18} />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wider font-semibold text-emerald-950">
+                  Drop 01 Community &amp; Dispatch Updates
+                </p>
+                <p className="text-xs text-emerald-800 mt-0.5">
+                  Get production progress, fitting notes, and early access to future Momentum drops.
+                </p>
+              </div>
+            </div>
+            <a
+              href={order.whatsappGroupInviteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-shrink-0 bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] uppercase tracking-[0.15em] font-medium py-2.5 px-4 rounded-xs transition-colors inline-flex items-center justify-center gap-2"
+            >
+              <MessageCircle size={14} />
+              <span>{order.whatsappGroupCtaText || "Join WhatsApp Group"}</span>
+            </a>
+          </div>
+        )}
+
+        <div className="print:hidden flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
           <Link
             href="/"
             className="w-full sm:w-auto bg-[#111111] hover:bg-black text-white text-xs uppercase tracking-[0.2em] font-medium py-4 px-8 rounded-xs transition-all shadow-md inline-flex items-center justify-center gap-2"
@@ -130,7 +241,9 @@ export default function OrderConfirmedClient({ orderId }: OrderConfirmedClientPr
         </div>
       </main>
 
-      <Footer />
+      <div className="print:hidden">
+        <Footer />
+      </div>
     </div>
   );
 }

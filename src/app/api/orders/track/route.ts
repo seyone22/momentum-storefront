@@ -67,6 +67,20 @@ export async function GET(req: NextRequest) {
       };
     });
 
+    let whatsappGroupInviteUrl: string | null = null;
+    let whatsappGroupCtaText = "Join Momentum Drop Updates on WhatsApp";
+    try {
+      const settings = await payload.findGlobal({ slug: "store-settings" });
+      if (settings?.whatsappGroupInviteUrl) {
+        whatsappGroupInviteUrl = String(settings.whatsappGroupInviteUrl);
+      }
+      if (settings?.whatsappGroupCtaText) {
+        whatsappGroupCtaText = String(settings.whatsappGroupCtaText);
+      }
+    } catch {
+      // Optional StoreSettings global
+    }
+
     return NextResponse.json({
       orderNumber: doc.orderNumber,
       customerName: doc.customerName,
@@ -80,6 +94,8 @@ export async function GET(req: NextRequest) {
       items: Array.isArray(doc.items) ? doc.items : [],
       returns,
       createdAt: doc.createdAt,
+      whatsappGroupInviteUrl,
+      whatsappGroupCtaText,
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed to lookup order";

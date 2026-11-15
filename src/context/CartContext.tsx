@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import CartDrawer, { CartItem } from "@/components/storefront/CartDrawer";
+import { trackFunnelEvent } from "@/lib/meta-pixel";
 
 const STORAGE_KEY = "momentum_cart_v1";
 
@@ -80,6 +81,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         ];
       });
       setIsCartOpen(true);
+      trackFunnelEvent({
+        eventName: "AddToCart",
+        customData: {
+          currency: "LKR",
+          value: incoming.priceLkr * qtyToAdd,
+          content_name: incoming.name,
+          content_type: "product",
+          contents: [
+            {
+              id: incoming.slug || incoming.id,
+              quantity: qtyToAdd,
+              item_price: incoming.priceLkr,
+            },
+          ],
+        },
+      });
     },
     []
   );

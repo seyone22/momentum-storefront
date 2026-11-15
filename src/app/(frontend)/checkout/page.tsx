@@ -1,15 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { useCart } from "@/context/CartContext";
 import { formatPriceLKR } from "@/lib/utils";
+import { getSavedAttribution } from "@/lib/attribution";
+import { trackFunnelEvent } from "@/lib/meta-pixel";
 import { Lock, ArrowRight, Loader2, ShoppingBag } from "lucide-react";
 
 export default function CheckoutPage() {
   const { items, subtotal, isHydrated, clearCart } = useCart();
+  const hasTrackedCheckoutRef = useRef(false);
+
+  useEffect(() => {
+    if (!isHydrated || items.length === 0 || hasTrackedCheckoutRef.current) return;
+    hasTrackedCheckoutRef.current = true;
+    trackFunnelEvent({
+      eventName: "InitiateCheckout",
+      customData: {
+        currency: "LKR",
+        value: subtotal,
+        content_type: "product",
+        contents: items.map((i) => ({
+          id: i.slug || i.id,
+          quantity: i.quantity,
+          item_price: i.priceLkr,
+        })),
+      },
+    });
+  }, [isHydrated, items, subtotal]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -53,6 +74,7 @@ export default function CheckoutPage() {
             address: formData.address,
             city: formData.city,
           },
+          attribution: getSavedAttribution(),
         }),
       });
 

@@ -20,7 +20,22 @@ export const metadata: Metadata = {
     "Limited-batch contemporary apparel by Momentum Clothing, operated by Grace Hood Ventures (PVT) LTD, Colombo, Sri Lanka.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+import { getPayload } from "payload";
+import configPromise from "@payload-config";
+import MetaPixelProvider from "@/components/storefront/MetaPixelProvider";
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  let metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID || process.env.META_PIXEL_ID || null;
+  try {
+    const payload = await getPayload({ config: configPromise });
+    const settings = await payload.findGlobal({ slug: "store-settings" });
+    if (settings?.metaPixelId) {
+      metaPixelId = String(settings.metaPixelId);
+    }
+  } catch {
+    // Safe fallback to env variable during build or if DB is unavailable
+  }
+
   return (
     <html
       lang="en"
@@ -28,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-full flex flex-col">
         <CartProvider>
+          <MetaPixelProvider pixelId={metaPixelId} />
           {children}
           <CookieConsent />
         </CartProvider>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Ruler } from "lucide-react";
+import { trackFunnelEvent } from "@/lib/meta-pixel";
 
 interface SizeGuideModalProps {
   isOpen: boolean;
@@ -10,6 +11,17 @@ interface SizeGuideModalProps {
 
 export default function SizeGuideModal({ isOpen, onClose }: SizeGuideModalProps) {
   const [unit, setUnit] = useState<"cm" | "in">("in");
+
+  useEffect(() => {
+    if (isOpen) {
+      trackFunnelEvent({
+        eventName: "ViewSizeChart",
+        customData: {
+          content_name: "Garment Sizing Spec",
+        },
+      });
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

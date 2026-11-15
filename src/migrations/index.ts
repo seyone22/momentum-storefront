@@ -5,6 +5,7 @@ import * as migration_20261115_131200_add_media_s3_objectkey from './20261115_13
 import * as migration_20261115_133000_add_returns_and_refunds from './20261115_133000_add_returns_and_refunds';
 import * as migration_20261115_135000_add_order_payment_link from './20261115_135000_add_order_payment_link';
 import * as migration_20261115_141000_add_order_capi_and_store_settings from './20261115_141000_add_order_capi_and_store_settings';
+import * as migration_20261115_163000_add_attribution_and_whatsapp_group from './20261115_163000_add_attribution_and_whatsapp_group';
 
 export const migrations = [
   {
@@ -41,5 +42,10 @@ export const migrations = [
     up: migration_20261115_141000_add_order_capi_and_store_settings.up,
     down: migration_20261115_141000_add_order_capi_and_store_settings.down,
     name: '20261115_141000_add_order_capi_and_store_settings',
+  },
+  {
+    up: migration_20261115_163000_add_attribution_and_whatsapp_group.up,
+    down: migration_20261115_163000_add_attribution_and_whatsapp_group.down,
+    name: '20261115_163000_add_attribution_and_whatsapp_group',
   },
 ];
