@@ -1,6 +1,6 @@
 import { getPayload } from 'payload';
 import configPromise from '@payload-config';
-import { PRODUCTS as SEED_PRODUCTS, Product, ProductMediaItem, ProductVariant } from './products';
+import { PRODUCTS as SEED_PRODUCTS, Product, ProductMediaItem, ProductVariant, enrichProductMetadata } from './products';
 
 let seedPromise: Promise<void> | null = null;
 
@@ -83,7 +83,7 @@ function mapPayloadDocToProduct(doc: Record<string, unknown>): Product {
     .map((g: Record<string, unknown>) => mapMedia(g?.image, name))
     .filter((m): m is ProductMediaItem => m !== null);
 
-  return {
+  return enrichProductMetadata({
     id: String(doc.id ?? ''),
     slug: String(doc.slug ?? ''),
     name,
@@ -97,7 +97,7 @@ function mapPayloadDocToProduct(doc: Record<string, unknown>): Product {
     gallery,
     variants,
     createdAt: doc.createdAt ? String(doc.createdAt) : undefined,
-  };
+  });
 }
 
 export async function getStorefrontProducts(): Promise<Product[]> {

@@ -10,15 +10,19 @@ import { Search, SlidersHorizontal, X } from "lucide-react";
 
 interface ProductsCatalogClientProps {
   products: Product[];
+  initialCategory?: string;
 }
 
 type SortOption = "featured" | "price-asc" | "price-desc" | "newest";
 
 const SIZES = ["26", "27", "28", "29", "30", "32"] as const;
 
-export default function ProductsCatalogClient({ products }: ProductsCatalogClientProps) {
+export default function ProductsCatalogClient({
+  products,
+  initialCategory,
+}: ProductsCatalogClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory || "All");
   const [selectedSize, setSelectedSize] = useState<string>("All");
   const [onlyInStock, setOnlyInStock] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("featured");

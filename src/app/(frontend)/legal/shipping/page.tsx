@@ -19,8 +19,8 @@ export default function ShippingPolicyPage() {
         <p>
           <strong>Momentum Clothing</strong> delivers islandwide across Sri Lanka through our
           licensed domestic courier partner, <strong>Prompt Xpress</strong>. All orders are
-          dispatched from Colombo, Sri Lanka, with SMS and tracking updates sent to the mobile
-          number provided at checkout.
+          inspected and dispatched from our warehouse in <strong>Ja-Ela, Sri Lanka</strong>, with
+          SMS and tracking updates sent to the mobile number provided at checkout.
         </p>
       </section>
 
@@ -101,8 +101,8 @@ export default function ShippingPolicyPage() {
             Order Tracking
           </Link>{" "}
           page using your Order ID. If a delivery fails due to an incorrect address or repeated
-          unavailability after courier contact attempts, the parcel will be returned to our Colombo
-          facility and re-dispatch may incur an additional courier fee.
+          unavailability after courier contact attempts, the parcel will be returned to our Ja-Ela
+          warehouse and re-dispatch may incur an additional courier fee.
         </p>
       </section>
 

@@ -157,6 +157,24 @@ export default function CartDrawer({
               </span>
             </div>
 
+            <div className="bg-white border border-[#e5e5e0] p-3 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-neutral-500">
+                  Complete The Look
+                </p>
+                <p className="text-xs text-black truncate">
+                  Pair your denim with Sculpt Trucker or Everyday basics.
+                </p>
+              </div>
+              <Link
+                href="/products"
+                onClick={onClose}
+                className="text-[10px] uppercase tracking-[0.18em] font-semibold text-black border border-black px-3 py-1.5 hover:bg-black hover:text-white transition-colors shrink-0"
+              >
+                Add
+              </Link>
+            </div>
+
             <Link
               href="/checkout"
               onClick={onClose}

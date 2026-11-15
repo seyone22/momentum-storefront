@@ -59,7 +59,7 @@ export default function ReturnsPolicyPage() {
             </span>
             <p>
               Once approved, we schedule a Prompt Xpress courier pickup from your doorstep. Your
-              returned item is inspected at our Colombo warehouse for condition and hygiene.
+              returned item is inspected at our Ja-Ela warehouse for condition and hygiene.
             </p>
           </div>
           <div className="bg-white border border-[#e5e5e0] p-4 space-y-2">

@@ -20,14 +20,17 @@ export default function Navbar({ cartCount, onOpenCart }: NavbarProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 grid grid-cols-3 items-center">
         
         {/* Left Links */}
-        <nav className="flex items-center space-x-5 sm:space-x-8 text-[11px] uppercase tracking-[0.2em] font-medium text-neutral-600 justify-self-start">
+        <nav className="flex items-center space-x-5 sm:space-x-7 text-[11px] uppercase tracking-[0.2em] font-medium text-neutral-600 justify-self-start">
           <Link href="/#collection" className="hover:text-black transition-colors whitespace-nowrap">
             Drop 01
           </Link>
           <Link href="/products" className="hover:text-black transition-colors whitespace-nowrap">
             Shop All
           </Link>
-          <Link href="/track" className="hidden md:inline-block hover:text-black transition-colors whitespace-nowrap">
+          <Link href="/about" className="hidden sm:inline-block hover:text-black transition-colors whitespace-nowrap">
+            Our Story
+          </Link>
+          <Link href="/track" className="hidden lg:inline-block hover:text-black transition-colors whitespace-nowrap">
             Track Order
           </Link>
         </nav>

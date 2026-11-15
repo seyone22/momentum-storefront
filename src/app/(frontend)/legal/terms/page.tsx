@@ -20,8 +20,9 @@ export default function TermsPage() {
           This website (<strong>momentumclothing.lk</strong>) is operated by{" "}
           <strong>Momentum Clothing</strong> (&ldquo;Momentum&rdquo;), a brand owned and
           managed by <strong>Grace Hood Ventures (PVT) LTD</strong> (Company Registration No:{" "}
-          <strong>PV 00329182</strong>), a private limited liability company incorporated in
-          Colombo, Sri Lanka. Throughout the site, the terms &ldquo;we&rdquo;, &ldquo;us&rdquo;,
+          <strong>PV 00329182</strong>), a private limited liability company incorporated in Sri
+          Lanka and operating from its office and warehouse in <strong>Ja-Ela, Sri Lanka</strong>.
+          Throughout the site, the terms &ldquo;we&rdquo;, &ldquo;us&rdquo;,
           and &ldquo;our&rdquo; refer to Momentum Clothing and Grace Hood Ventures (PVT) LTD.
         </p>
         <p>
@@ -377,7 +378,7 @@ export default function TermsPage() {
           <p>
             <strong>Grace Hood Ventures (PVT) LTD</strong> (t/a Momentum Clothing)
           </p>
-          <p>Company Registration No: PV 00329182 · Colombo, Sri Lanka</p>
+          <p>Company Registration No: PV 00329182 · Office &amp; Warehouse: Ja-Ela, Sri Lanka</p>
           <p>
             Email:{" "}
             <a

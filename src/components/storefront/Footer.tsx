@@ -18,7 +18,11 @@ export default function Footer() {
               className="h-7 w-auto invert brightness-200"
             />
             <p className="text-xs text-neutral-400 max-w-sm leading-relaxed">
-              Grace Hood Ventures (PVT) LTD (Reg. No: PV 00329182). Limited-batch contemporary apparel.
+              Grace Hood Ventures (PVT) LTD (Reg. No: PV 00329182). Limited-batch contemporary apparel
+              crafted for accessible luxury.
+            </p>
+            <p className="text-[11px] text-neutral-500">
+              Office &amp; Warehouse: Ja-Ela, Sri Lanka
             </p>
             <p className="text-xs text-neutral-400">
               <a
@@ -44,6 +48,11 @@ export default function Footer() {
               <li>
                 <Link href="/products" className="hover:text-white transition-colors">
                   Shop All
+                </Link>
+              </li>
+              <li>
+                <Link href="/about" className="hover:text-white transition-colors">
+                  Our Story
                 </Link>
               </li>
               <li>
@@ -106,7 +115,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="pt-8 flex flex-col sm:flex-row justify-between items-center text-[11px] text-neutral-500 space-y-4 sm:space-y-0">
           <p>&copy; 2026 Momentum Clothing / Grace Hood Ventures (PVT) LTD.</p>
-          <p className="tracking-widest uppercase">Colombo, Sri Lanka</p>
+          <p className="tracking-widest uppercase">Ja-Ela · Colombo, Sri Lanka</p>
         </div>
       </div>
     </footer>

@@ -1,4 +1,4 @@
-import { getProductBySlug } from "@/lib/payload-products";
+import { getProductBySlug, getStorefrontProducts } from "@/lib/payload-products";
 import { notFound } from "next/navigation";
 import ProductDetailClient from "./ProductDetailClient";
 
@@ -10,11 +10,20 @@ interface ProductPageProps {
 
 export default async function ProductDetailPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  const [product, allProducts] = await Promise.all([
+    getProductBySlug(slug),
+    getStorefrontProducts(),
+  ]);
 
   if (!product) {
     notFound();
   }
 
-  return <ProductDetailClient product={product} />;
+  const others = allProducts.filter((p) => p.slug !== product.slug);
+  const preferred = product.pairsWithSlugs?.length
+    ? others.filter((p) => product.pairsWithSlugs?.includes(p.slug))
+    : [];
+  const pairings = (preferred.length > 0 ? preferred : others).slice(0, 3);
+
+  return <ProductDetailClient product={product} pairings={pairings} />;
 }

@@ -20,7 +20,8 @@ export default function PrivacyPage() {
         <p>
           At <strong>Momentum Clothing</strong> (&ldquo;Momentum&rdquo;), operated by{" "}
           <strong>Grace Hood Ventures (PVT) LTD</strong> (Company Registration No:{" "}
-          <strong>PV 00329182</strong>, Colombo, Sri Lanka), we value your privacy and are
+          <strong>PV 00329182</strong>, Office &amp; Warehouse: Ja-Ela, Sri Lanka), we value your
+          privacy and are
           committed to protecting the personal data you share with us. This Privacy Policy explains
           how we collect, use, disclose, and safeguard your information when you visit{" "}
           <strong>momentumclothing.lk</strong>, place a pre-order or purchase, or interact with us
@@ -293,7 +294,7 @@ export default function PrivacyPage() {
           <p>
             <strong>Momentum Customer Care — Grace Hood Ventures (PVT) LTD</strong>
           </p>
-          <p>Company Registration No: PV 00329182 · Colombo, Sri Lanka</p>
+          <p>Company Registration No: PV 00329182 · Office &amp; Warehouse: Ja-Ela, Sri Lanka</p>
           <p>
             Email:{" "}
             <a
