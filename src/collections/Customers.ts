@@ -1,10 +1,51 @@
 import { CollectionConfig, Where } from 'payload';
+import { diffRecord, writeAuditLog } from '../lib/audit';
 
 export const Customers: CollectionConfig = {
   slug: 'customers',
   admin: {
     useAsTitle: 'email',
     defaultColumns: ['name', 'email', 'phone', 'defaultCity', 'createdAt'],
+  },
+  hooks: {
+    afterChange: [
+      async ({ doc, previousDoc, operation, req }) => {
+        const changes =
+          operation === 'update'
+            ? diffRecord(
+                previousDoc as unknown as Record<string, unknown>,
+                doc as unknown as Record<string, unknown>
+              )
+            : undefined;
+        await writeAuditLog({
+          payload: req.payload,
+          headers: req.headers,
+          reqUser: req.user as { id?: string | number; email?: string; collection?: string } | null,
+          action: operation === 'create' ? 'customer.created' : 'customer.updated',
+          entityType: 'customer',
+          entityId: doc.id,
+          entityRef: String(doc.email || doc.id),
+          summary: `Customer ${operation === 'create' ? 'created' : 'updated'}: ${doc.email}`,
+          metadata: changes ? { changes } : undefined,
+        });
+        return doc;
+      },
+    ],
+    afterDelete: [
+      async ({ doc, req }) => {
+        await writeAuditLog({
+          payload: req.payload,
+          headers: req.headers,
+          reqUser: req.user as { id?: string | number; email?: string; collection?: string } | null,
+          action: 'customer.deleted',
+          entityType: 'customer',
+          entityId: doc.id,
+          entityRef: String(doc.email || doc.id),
+          summary: `Customer deleted: ${doc.email}`,
+        });
+        return doc;
+      },
+    ],
   },
   auth: {
     tokenExpiration: 60 * 60 * 24 * 14, // 14 days

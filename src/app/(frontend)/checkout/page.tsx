@@ -9,6 +9,11 @@ import { formatPriceLKR } from "@/lib/utils";
 import { getSavedAttribution } from "@/lib/attribution";
 import { trackFunnelEvent } from "@/lib/meta-pixel";
 import { SRI_LANKA_DISTRICTS } from "@/lib/sri-lanka";
+import {
+  calculateShippingLkr,
+  DEFAULT_SHIPPING_SETTINGS,
+  ShippingSettingsConfig,
+} from "@/lib/shipping";
 import { Lock, ArrowRight, Loader2, ShoppingBag } from "lucide-react";
 
 export default function CheckoutPage() {
@@ -48,6 +53,31 @@ export default function CheckoutPage() {
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
   const [marketingEmailOptIn, setMarketingEmailOptIn] = useState(false);
   const [signedInEmail, setSignedInEmail] = useState<string | null>(null);
+  const [shippingConfig, setShippingConfig] = useState<ShippingSettingsConfig>(
+    DEFAULT_SHIPPING_SETTINGS
+  );
+
+  useEffect(() => {
+    fetch("/api/store-settings/shipping", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && typeof data.shippingEnabled === "boolean") {
+          setShippingConfig(data);
+        }
+      })
+      .catch(() => {
+        // Fallback to default complimentary shipping
+      });
+  }, []);
+
+  const totalPieceCount = items.reduce((sum, i) => sum + i.quantity, 0);
+  const shippingCalc = calculateShippingLkr({
+    subtotalLkr: subtotal,
+    itemCount: totalPieceCount,
+    district: formData.district,
+    settings: shippingConfig,
+  });
+  const grandTotal = subtotal + shippingCalc.shippingLkr;
 
   useEffect(() => {
     fetch("/api/account/me", { cache: "no-store" })
@@ -374,7 +404,7 @@ export default function CheckoutPage() {
                     ) : (
                       <>
                         <Lock size={14} />
-                        <span>Pay {formatPriceLKR(subtotal)}</span>
+                        <span>Pay {formatPriceLKR(grandTotal)}</span>
                         <ArrowRight size={15} />
                       </>
                     )}
@@ -443,7 +473,15 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between">
                   <span>Islandwide Courier (Prompt Xpress)</span>
-                  <span className="uppercase tracking-wider text-neutral-800">Complimentary</span>
+                  <span className="font-mono text-neutral-900">
+                    {shippingCalc.shippingLkr === 0
+                      ? "Complimentary"
+                      : formatPriceLKR(shippingCalc.shippingLkr)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-[11px] text-neutral-500">
+                  <span>Courier Tier</span>
+                  <span>{shippingCalc.ruleSummary}</span>
                 </div>
                 <div className="flex justify-between text-[11px] text-neutral-500 pt-1">
                   <span>Pre-Order Dispatch</span>
@@ -453,7 +491,7 @@ export default function CheckoutPage() {
 
               <div className="border-t border-neutral-300 pt-4 flex justify-between items-baseline text-sm font-semibold text-black">
                 <span className="uppercase tracking-wider text-xs">Total</span>
-                <span className="font-mono text-base">{formatPriceLKR(subtotal)}</span>
+                <span className="font-mono text-base">{formatPriceLKR(grandTotal)}</span>
               </div>
             </div>
           </div>

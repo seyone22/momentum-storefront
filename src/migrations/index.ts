@@ -8,6 +8,7 @@ import * as migration_20261115_141000_add_order_capi_and_store_settings from './
 import * as migration_20261115_163000_add_attribution_and_whatsapp_group from './20261115_163000_add_attribution_and_whatsapp_group';
 import * as migration_20261115_170000_add_customers_collection from './20261115_170000_add_customers_collection';
 import * as migration_20261115_173000_add_district_zip_marketing from './20261115_173000_add_district_zip_marketing';
+import * as migration_20261115_180000_add_shipping_and_audit_logs from './20261115_180000_add_shipping_and_audit_logs';
 
 export const migrations = [
   {
@@ -59,5 +60,10 @@ export const migrations = [
     up: migration_20261115_173000_add_district_zip_marketing.up,
     down: migration_20261115_173000_add_district_zip_marketing.down,
     name: '20261115_173000_add_district_zip_marketing',
+  },
+  {
+    up: migration_20261115_180000_add_shipping_and_audit_logs.up,
+    down: migration_20261115_180000_add_shipping_and_audit_logs.down,
+    name: '20261115_180000_add_shipping_and_audit_logs',
   },
 ];

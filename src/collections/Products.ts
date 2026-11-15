@@ -1,10 +1,51 @@
 import { CollectionConfig } from 'payload';
+import { diffRecord, writeAuditLog } from '../lib/audit';
 
 export const Products: CollectionConfig = {
   slug: 'products',
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'category', 'priceLkr', 'preOrderBatchCap'],
+  },
+  hooks: {
+    afterChange: [
+      async ({ doc, previousDoc, operation, req }) => {
+        const changes =
+          operation === 'update'
+            ? diffRecord(
+                previousDoc as unknown as Record<string, unknown>,
+                doc as unknown as Record<string, unknown>
+              )
+            : undefined;
+        await writeAuditLog({
+          payload: req.payload,
+          headers: req.headers,
+          reqUser: req.user as { id?: string | number; email?: string; collection?: string } | null,
+          action: operation === 'create' ? 'product.created' : 'product.updated',
+          entityType: 'product',
+          entityId: doc.id,
+          entityRef: String(doc.slug || doc.name || doc.id),
+          summary: `Product ${operation === 'create' ? 'created' : 'updated'}: ${doc.name}`,
+          metadata: changes ? { changes } : { priceLkr: doc.priceLkr },
+        });
+        return doc;
+      },
+    ],
+    afterDelete: [
+      async ({ doc, req }) => {
+        await writeAuditLog({
+          payload: req.payload,
+          headers: req.headers,
+          reqUser: req.user as { id?: string | number; email?: string; collection?: string } | null,
+          action: 'product.deleted',
+          entityType: 'product',
+          entityId: doc.id,
+          entityRef: String(doc.slug || doc.name || doc.id),
+          summary: `Product deleted: ${doc.name}`,
+        });
+        return doc;
+      },
+    ],
   },
   fields: [
     {

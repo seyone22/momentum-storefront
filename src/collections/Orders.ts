@@ -1,5 +1,6 @@
 import { CollectionConfig } from 'payload';
 import { sendMetaCapiEvent } from '../lib/meta-capi';
+import { diffRecord, writeAuditLog } from '../lib/audit';
 
 export const Orders: CollectionConfig = {
   slug: 'orders',
@@ -28,7 +29,35 @@ export const Orders: CollectionConfig = {
       },
     ],
     afterChange: [
-      async ({ doc, req, context }) => {
+      async ({ doc, previousDoc, operation, req, context }) => {
+        if (!context?.skipAuditHook) {
+          const changes =
+            operation === 'update'
+              ? diffRecord(
+                  previousDoc as unknown as Record<string, unknown>,
+                  doc as unknown as Record<string, unknown>
+                )
+              : undefined;
+          await writeAuditLog({
+            payload: req.payload,
+            headers: req.headers,
+            reqUser: req.user as { id?: string | number; email?: string; collection?: string } | null,
+            action: operation === 'create' ? 'order.created' : 'order.updated',
+            entityType: 'order',
+            entityId: doc.id,
+            entityRef: String(doc.orderNumber || doc.id),
+            summary: `Order ${operation === 'create' ? 'created' : 'updated'}: ${doc.orderNumber || doc.id} (${doc.paymentStatus}/${doc.fulfillmentStatus})`,
+            metadata: changes
+              ? { changes }
+              : {
+                  totalLkr: doc.totalLkr,
+                  shippingLkr: doc.shippingLkr ?? 0,
+                  paymentRail: doc.paymentRail,
+                  district: doc.district,
+                },
+          });
+        }
+
         if (context?.skipCapiHook) return doc;
 
         if (doc.paymentStatus === 'paid' && doc.capiPurchaseSent !== true) {
@@ -89,12 +118,39 @@ export const Orders: CollectionConfig = {
               context: {
                 ...context,
                 skipCapiHook: true,
+                skipAuditHook: true,
               },
               req,
+            });
+            await writeAuditLog({
+              payload: req.payload,
+              headers: req.headers,
+              action: 'capi.purchase_sent',
+              entityType: 'order',
+              entityId: doc.id,
+              entityRef: String(doc.orderNumber || doc.id),
+              actorType: 'system',
+              summary: `Meta CAPI Purchase event sent (${eventId})`,
+              metadata: { eventId, totalLkr: doc.totalLkr },
             });
           }
         }
 
+        return doc;
+      },
+    ],
+    afterDelete: [
+      async ({ doc, req }) => {
+        await writeAuditLog({
+          payload: req.payload,
+          headers: req.headers,
+          reqUser: req.user as { id?: string | number; email?: string; collection?: string } | null,
+          action: 'order.deleted',
+          entityType: 'order',
+          entityId: doc.id,
+          entityRef: String(doc.orderNumber || doc.id),
+          summary: `Order deleted: ${doc.orderNumber || doc.id}`,
+        });
         return doc;
       },
     ],
@@ -159,6 +215,17 @@ export const Orders: CollectionConfig = {
       admin: {
         position: 'sidebar',
       },
+    },
+    {
+      name: 'subtotalLkr',
+      type: 'number',
+      label: 'Subtotal (LKR)',
+    },
+    {
+      name: 'shippingLkr',
+      type: 'number',
+      defaultValue: 0,
+      label: 'Shipping Fee (LKR)',
     },
     {
       name: 'totalLkr',

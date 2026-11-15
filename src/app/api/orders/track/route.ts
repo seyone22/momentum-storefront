@@ -85,6 +85,8 @@ export async function GET(req: NextRequest) {
       orderNumber: doc.orderNumber,
       customerName: doc.customerName,
       city: doc.city,
+      subtotalLkr: Number(doc.subtotalLkr ?? doc.totalLkr ?? 0),
+      shippingLkr: Number(doc.shippingLkr ?? 0),
       totalLkr: doc.totalLkr,
       refundedLkr: Number(doc.refundedLkr ?? 0),
       paymentRail: doc.paymentRail,

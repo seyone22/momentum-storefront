@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 import configPromise from "@payload-config";
 import { attachCustomerSessionCookie } from "@/lib/customer-auth";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,6 +25,19 @@ export async function POST(req: NextRequest) {
     });
 
     const user = result.user as unknown as Record<string, unknown>;
+    await writeAuditLog({
+      payload,
+      headers: req.headers,
+      action: "customer.login",
+      entityType: "customer",
+      entityId: String(user.id),
+      entityRef: email,
+      actorType: "customer",
+      actorId: String(user.id),
+      actorEmail: email,
+      summary: `Customer signed in: ${email}`,
+    });
+
     const res = NextResponse.json({
       customer: {
         id: user.id,
@@ -37,6 +51,14 @@ export async function POST(req: NextRequest) {
 
     return attachCustomerSessionCookie(res, result.token);
   } catch {
+    await writeAuditLog({
+      headers: req.headers,
+      action: "customer.login_failed",
+      entityType: "customer",
+      actorType: "guest",
+      status: "failure",
+      summary: "Failed customer login attempt",
+    });
     return NextResponse.json(
       { error: "Invalid email or password." },
       { status: 401 }

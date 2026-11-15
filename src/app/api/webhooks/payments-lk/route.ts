@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 import configPromise from "@payload-config";
 import { verifyWebhookSignature } from "@/lib/payments-lk";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,6 +14,15 @@ export async function POST(req: NextRequest) {
 
     if (!verifyWebhookSignature(rawBody, signature)) {
       console.error("Invalid Payments.lk webhook signature");
+      await writeAuditLog({
+        headers: req.headers,
+        action: "webhook.payments_lk_rejected",
+        entityType: "webhook",
+        entityRef: "payments-lk",
+        actorType: "webhook",
+        status: "failure",
+        summary: "Payments.lk webhook rejected due to invalid HMAC signature",
+      });
       return NextResponse.json({ error: "Invalid webhook signature" }, { status: 401 });
     }
 

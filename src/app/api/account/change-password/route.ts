@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { attachCustomerSessionCookie, getAuthenticatedCustomer } from "@/lib/customer-auth";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function POST(req: NextRequest) {
   const { payload, customer } = await getAuthenticatedCustomer(req.headers);
@@ -60,6 +61,19 @@ export async function POST(req: NextRequest) {
         email: customer.email,
         password: newPassword,
       },
+    });
+
+    await writeAuditLog({
+      payload,
+      headers: req.headers,
+      action: "customer.password_changed",
+      entityType: "customer",
+      entityId: customer.id,
+      entityRef: customer.email,
+      actorType: "customer",
+      actorId: customer.id,
+      actorEmail: customer.email,
+      summary: `Customer changed password: ${customer.email}`,
     });
 
     const res = NextResponse.json({ success: true });

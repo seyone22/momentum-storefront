@@ -10,6 +10,7 @@ import { Products } from './src/collections/Products';
 import { Orders } from './src/collections/Orders';
 import { Media } from './src/collections/Media';
 import { Returns } from './src/collections/Returns';
+import { AuditLogs } from './src/collections/AuditLogs';
 import { StoreSettings } from './src/globals/StoreSettings';
 import { migrations } from './src/migrations';
 
@@ -23,7 +24,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Customers, Products, Orders, Media, Returns],
+  collections: [Users, Customers, Products, Orders, Media, Returns, AuditLogs],
   globals: [StoreSettings],
   plugins: [
     ...(process.env.S3_BUCKET

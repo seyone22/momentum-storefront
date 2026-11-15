@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload';
+import { diffRecord, writeAuditLog } from '../lib/audit';
 
 export const Returns: CollectionConfig = {
   slug: 'returns',
@@ -21,7 +22,28 @@ export const Returns: CollectionConfig = {
       },
     ],
     afterChange: [
-      async ({ doc, req, context }) => {
+      async ({ doc, previousDoc, operation, req, context }) => {
+        if (!context?.skipAuditHook) {
+          const changes =
+            operation === 'update'
+              ? diffRecord(
+                  previousDoc as unknown as Record<string, unknown>,
+                  doc as unknown as Record<string, unknown>
+                )
+              : undefined;
+          await writeAuditLog({
+            payload: req.payload,
+            headers: req.headers,
+            reqUser: req.user as { id?: string | number; email?: string; collection?: string } | null,
+            action: operation === 'create' ? 'return.created' : 'return.updated',
+            entityType: 'return',
+            entityId: doc.id,
+            entityRef: String(doc.rmaNumber || doc.id),
+            summary: `Return ${operation === 'create' ? 'requested' : 'updated'}: ${doc.rmaNumber || doc.id} (${doc.status})`,
+            metadata: changes ? { changes } : { type: doc.type, status: doc.status },
+          });
+        }
+
         if (context?.skipRestockHook) return doc;
 
         if (
@@ -91,6 +113,21 @@ export const Returns: CollectionConfig = {
           });
         }
 
+        return doc;
+      },
+    ],
+    afterDelete: [
+      async ({ doc, req }) => {
+        await writeAuditLog({
+          payload: req.payload,
+          headers: req.headers,
+          reqUser: req.user as { id?: string | number; email?: string; collection?: string } | null,
+          action: 'return.deleted',
+          entityType: 'return',
+          entityId: doc.id,
+          entityRef: String(doc.rmaNumber || doc.id),
+          summary: `Return deleted: ${doc.rmaNumber || doc.id}`,
+        });
         return doc;
       },
     ],

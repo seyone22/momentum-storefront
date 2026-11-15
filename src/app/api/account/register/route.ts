@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 import configPromise from "@payload-config";
 import { attachCustomerSessionCookie } from "@/lib/customer-auth";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -85,6 +86,19 @@ export async function POST(req: NextRequest) {
     const loginResult = await payload.login({
       collection: "customers",
       data: { email, password },
+    });
+
+    await writeAuditLog({
+      payload,
+      headers: req.headers,
+      action: "customer.registered",
+      entityType: "customer",
+      entityId: created.id,
+      entityRef: email,
+      actorType: "customer",
+      actorId: created.id,
+      actorEmail: email,
+      summary: `Customer registered: ${email}`,
     });
 
     const res = NextResponse.json(

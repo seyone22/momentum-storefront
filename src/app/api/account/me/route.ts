@@ -26,6 +26,8 @@ export async function GET(req: NextRequest) {
       return {
         id: doc.id,
         orderNumber: doc.orderNumber,
+        subtotalLkr: Number(doc.subtotalLkr ?? doc.totalLkr ?? 0),
+        shippingLkr: Number(doc.shippingLkr ?? 0),
         totalLkr: Number(doc.totalLkr ?? 0),
         refundedLkr: Number(doc.refundedLkr ?? 0),
         paymentRail: doc.paymentRail,

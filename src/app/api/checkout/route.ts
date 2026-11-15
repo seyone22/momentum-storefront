@@ -3,6 +3,7 @@ import { getPayload } from "payload";
 import configPromise from "@payload-config";
 import { createPaymentsLkCheckout } from "@/lib/payments-lk";
 import { getAuthenticatedCustomer } from "@/lib/customer-auth";
+import { calculateShippingLkr, extractShippingSettings } from "@/lib/shipping";
 
 interface CheckoutItemInput {
   id: string;
@@ -147,10 +148,26 @@ export async function POST(req: NextRequest) {
     }
 
     const orderNumber = `MMTM-${Math.floor(100000 + Math.random() * 900000)}`;
-
     const fbpCookie = req.cookies.get("_fbp")?.value;
     const fbcCookie = req.cookies.get("_fbc")?.value;
     const { customer: authenticatedCustomer } = await getAuthenticatedCustomer(req.headers, payload);
+
+    const subtotalLkr = totalLkr;
+    const totalItemCount = verifiedItems.reduce((sum, i) => sum + i.quantity, 0);
+    let shippingSettingsRaw: Record<string, unknown> | null = null;
+    try {
+      const settings = await payload.findGlobal({ slug: "store-settings" });
+      shippingSettingsRaw = settings as unknown as Record<string, unknown>;
+    } catch {
+      shippingSettingsRaw = null;
+    }
+    const shippingCalc = calculateShippingLkr({
+      subtotalLkr,
+      itemCount: totalItemCount,
+      district: customer.district,
+      settings: extractShippingSettings(shippingSettingsRaw),
+    });
+    totalLkr = subtotalLkr + shippingCalc.shippingLkr;
 
     // Persist order in Payload CMS (PostgreSQL)
     const createdOrder = await payload.create({
@@ -168,6 +185,8 @@ export async function POST(req: NextRequest) {
         district: customer.district.trim(),
         postalCode: customer.postalCode.trim(),
         marketingEmailOptIn: Boolean(customer.marketingEmailOptIn),
+        subtotalLkr,
+        shippingLkr: shippingCalc.shippingLkr,
         totalLkr,
         paymentRail: "Payments.lk",
         paymentStatus: "pending",

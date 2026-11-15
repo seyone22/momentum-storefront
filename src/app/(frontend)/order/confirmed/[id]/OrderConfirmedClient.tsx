@@ -17,6 +17,8 @@ interface OrderSummary {
   orderNumber: string;
   customerName: string;
   city: string;
+  subtotalLkr?: number;
+  shippingLkr?: number;
   totalLkr: number;
   paymentRail?: string;
   paymentStatus: string;
@@ -167,6 +169,20 @@ export default function OrderConfirmedClient({ orderId }: OrderConfirmedClientPr
                   </span>
                 </div>
               ))}
+              <div className="flex justify-between text-xs text-neutral-600 pt-2 border-t border-neutral-100">
+                <span>Subtotal</span>
+                <span className="font-mono">
+                  {formatPriceLKR(order.subtotalLkr ?? order.totalLkr)}
+                </span>
+              </div>
+              <div className="flex justify-between text-xs text-neutral-600">
+                <span>Islandwide Courier</span>
+                <span className="font-mono">
+                  {Number(order.shippingLkr ?? 0) === 0
+                    ? "Complimentary"
+                    : formatPriceLKR(Number(order.shippingLkr))}
+                </span>
+              </div>
               <div className="flex justify-between text-xs font-semibold pt-2 border-t border-neutral-100">
                 <span>Total</span>
                 <span className="font-mono">{formatPriceLKR(order.totalLkr)}</span>
