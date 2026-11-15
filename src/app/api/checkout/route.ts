@@ -23,6 +23,9 @@ export async function POST(req: NextRequest) {
         phone?: string;
         address?: string;
         city?: string;
+        district?: string;
+        postalCode?: string;
+        marketingEmailOptIn?: boolean;
       };
       attribution?: {
         utmSource?: string;
@@ -48,10 +51,12 @@ export async function POST(req: NextRequest) {
       !customer?.email?.trim() ||
       !customer?.phone?.trim() ||
       !customer?.address?.trim() ||
-      !customer?.city?.trim()
+      !customer?.city?.trim() ||
+      !customer?.district?.trim() ||
+      !customer?.postalCode?.trim()
     ) {
       return NextResponse.json(
-        { error: "Please complete all required delivery details." },
+        { error: "Please complete all required delivery details (including district and zip/postal code)." },
         { status: 400 }
       );
     }
@@ -160,6 +165,9 @@ export async function POST(req: NextRequest) {
         customerEmail: customer.email.trim(),
         shippingAddress: customer.address.trim(),
         city: customer.city.trim(),
+        district: customer.district.trim(),
+        postalCode: customer.postalCode.trim(),
+        marketingEmailOptIn: Boolean(customer.marketingEmailOptIn),
         totalLkr,
         paymentRail: "Payments.lk",
         paymentStatus: "pending",

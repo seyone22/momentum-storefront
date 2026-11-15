@@ -8,6 +8,7 @@ import { useCart } from "@/context/CartContext";
 import { formatPriceLKR } from "@/lib/utils";
 import { getSavedAttribution } from "@/lib/attribution";
 import { trackFunnelEvent } from "@/lib/meta-pixel";
+import { SRI_LANKA_DISTRICTS } from "@/lib/sri-lanka";
 import { Lock, ArrowRight, Loader2, ShoppingBag } from "lucide-react";
 
 export default function CheckoutPage() {
@@ -38,11 +39,14 @@ export default function CheckoutPage() {
     phone: "",
     address: "",
     city: "",
+    district: "Colombo",
+    postalCode: "",
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
+  const [marketingEmailOptIn, setMarketingEmailOptIn] = useState(false);
   const [signedInEmail, setSignedInEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -57,7 +61,12 @@ export default function CheckoutPage() {
             phone: prev.phone || data.customer.phone || "",
             address: prev.address || data.customer.defaultAddress || "",
             city: prev.city || data.customer.defaultCity || "",
+            district: data.customer.defaultDistrict || prev.district || "Colombo",
+            postalCode: prev.postalCode || data.customer.defaultPostalCode || "",
           }));
+          if (data.customer.marketingEmailOptIn) {
+            setMarketingEmailOptIn(true);
+          }
         }
       })
       .catch(() => {
@@ -94,6 +103,9 @@ export default function CheckoutPage() {
             phone: formData.phone,
             address: formData.address,
             city: formData.city,
+            district: formData.district,
+            postalCode: formData.postalCode,
+            marketingEmailOptIn,
           },
           attribution: getSavedAttribution(),
         }),
@@ -256,7 +268,52 @@ export default function CheckoutPage() {
                   />
                 </div>
 
-                <div className="pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider font-medium text-neutral-700 mb-1">
+                      District
+                    </label>
+                    <select
+                      required
+                      value={formData.district}
+                      onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                      className="w-full text-xs p-3 border border-neutral-300 bg-white focus:border-black focus:outline-none"
+                    >
+                      {SRI_LANKA_DISTRICTS.map((dist) => (
+                        <option key={dist} value={dist}>
+                          {dist}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider font-medium text-neutral-700 mb-1">
+                      Zip / Postal Code
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. 00700"
+                      value={formData.postalCode}
+                      onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+                      className="w-full text-xs p-3 border border-neutral-300 focus:border-black focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2 space-y-3">
+                  <label className="flex items-start gap-2.5 text-xs text-neutral-600 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={marketingEmailOptIn}
+                      onChange={(e) => setMarketingEmailOptIn(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 accent-black border-neutral-300 cursor-pointer shrink-0"
+                    />
+                    <span className="leading-relaxed">
+                      Email me with news, limited drop announcements, and exclusive Momentum offers.
+                    </span>
+                  </label>
+
                   <label className="flex items-start gap-2.5 text-xs text-neutral-600 cursor-pointer select-none">
                     <input
                       type="checkbox"

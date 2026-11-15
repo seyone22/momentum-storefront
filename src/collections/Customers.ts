@@ -54,5 +54,21 @@ export const Customers: CollectionConfig = {
       type: 'text',
       label: 'Default City',
     },
+    {
+      name: 'defaultDistrict',
+      type: 'text',
+      label: 'Default District',
+    },
+    {
+      name: 'defaultPostalCode',
+      type: 'text',
+      label: 'Default Postal / Zip Code',
+    },
+    {
+      name: 'marketingEmailOptIn',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Marketing Emails Opt-In',
+    },
   ],
 };

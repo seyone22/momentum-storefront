@@ -12,6 +12,9 @@ export interface AuthenticatedCustomer {
   phone?: string | null;
   defaultAddress?: string | null;
   defaultCity?: string | null;
+  defaultDistrict?: string | null;
+  defaultPostalCode?: string | null;
+  marketingEmailOptIn?: boolean;
 }
 
 export async function getAuthenticatedCustomer(
@@ -32,6 +35,9 @@ export async function getAuthenticatedCustomer(
           phone: user.phone ? String(user.phone) : null,
           defaultAddress: user.defaultAddress ? String(user.defaultAddress) : null,
           defaultCity: user.defaultCity ? String(user.defaultCity) : null,
+          defaultDistrict: user.defaultDistrict ? String(user.defaultDistrict) : null,
+          defaultPostalCode: user.defaultPostalCode ? String(user.defaultPostalCode) : null,
+          marketingEmailOptIn: Boolean(user.marketingEmailOptIn),
         },
       };
     }

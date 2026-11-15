@@ -142,6 +142,25 @@ export const Orders: CollectionConfig = {
       required: true,
     },
     {
+      name: 'district',
+      type: 'text',
+      label: 'District',
+    },
+    {
+      name: 'postalCode',
+      type: 'text',
+      label: 'Postal / Zip Code',
+    },
+    {
+      name: 'marketingEmailOptIn',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Marketing Emails Opt-In',
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
       name: 'totalLkr',
       type: 'number',
       defaultValue: 0,

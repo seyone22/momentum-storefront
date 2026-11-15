@@ -5,6 +5,7 @@ import Link from "next/link";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { formatPriceLKR } from "@/lib/utils";
+import { SRI_LANKA_DISTRICTS } from "@/lib/sri-lanka";
 import {
   User,
   Package,
@@ -23,6 +24,9 @@ interface CustomerProfile {
   phone?: string | null;
   defaultAddress?: string | null;
   defaultCity?: string | null;
+  defaultDistrict?: string | null;
+  defaultPostalCode?: string | null;
+  marketingEmailOptIn?: boolean;
 }
 
 interface CustomerOrder {
@@ -73,6 +77,9 @@ export default function AccountPage() {
     phone: "",
     defaultAddress: "",
     defaultCity: "",
+    defaultDistrict: "Colombo",
+    defaultPostalCode: "",
+    marketingEmailOptIn: false,
   });
   const [profileBusy, setProfileBusy] = useState(false);
   const [profileMsg, setProfileMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
@@ -100,6 +107,9 @@ export default function AccountPage() {
             phone: data.customer.phone || "",
             defaultAddress: data.customer.defaultAddress || "",
             defaultCity: data.customer.defaultCity || "",
+            defaultDistrict: data.customer.defaultDistrict || "Colombo",
+            defaultPostalCode: data.customer.defaultPostalCode || "",
+            marketingEmailOptIn: Boolean(data.customer.marketingEmailOptIn),
           });
         }
       } else {
@@ -596,6 +606,53 @@ export default function AccountPage() {
                       className="w-full border border-neutral-300 px-3 py-2 text-sm bg-white focus:outline-none focus:border-black"
                     />
                   </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[11px] uppercase tracking-wider text-neutral-600 mb-1">
+                        District
+                      </label>
+                      <select
+                        value={profileForm.defaultDistrict}
+                        onChange={(e) =>
+                          setProfileForm({ ...profileForm, defaultDistrict: e.target.value })
+                        }
+                        className="w-full border border-neutral-300 px-3 py-2 text-sm bg-white focus:outline-none focus:border-black"
+                      >
+                        {SRI_LANKA_DISTRICTS.map((dist) => (
+                          <option key={dist} value={dist}>
+                            {dist}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] uppercase tracking-wider text-neutral-600 mb-1">
+                        Zip / Postal Code
+                      </label>
+                      <input
+                        type="text"
+                        value={profileForm.defaultPostalCode}
+                        onChange={(e) =>
+                          setProfileForm({ ...profileForm, defaultPostalCode: e.target.value })
+                        }
+                        placeholder="e.g. 00700"
+                        className="w-full border border-neutral-300 px-3 py-2 text-sm bg-white focus:outline-none focus:border-black"
+                      />
+                    </div>
+                  </div>
+                  <label className="flex items-start gap-2.5 text-xs text-neutral-600 cursor-pointer select-none pt-1">
+                    <input
+                      type="checkbox"
+                      checked={profileForm.marketingEmailOptIn}
+                      onChange={(e) =>
+                        setProfileForm({ ...profileForm, marketingEmailOptIn: e.target.checked })
+                      }
+                      className="mt-0.5 h-4 w-4 accent-black border-neutral-300 cursor-pointer shrink-0"
+                    />
+                    <span className="leading-relaxed">
+                      Email me with news, limited drop announcements, and exclusive Momentum offers.
+                    </span>
+                  </label>
                   <button
                     type="submit"
                     disabled={profileBusy}

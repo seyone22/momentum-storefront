@@ -60,6 +60,14 @@ export async function PATCH(req: NextRequest) {
       typeof body?.defaultAddress === "string" ? body.defaultAddress.trim() : "";
     const defaultCity =
       typeof body?.defaultCity === "string" ? body.defaultCity.trim() : "";
+    const defaultDistrict =
+      typeof body?.defaultDistrict === "string" ? body.defaultDistrict.trim() : "";
+    const defaultPostalCode =
+      typeof body?.defaultPostalCode === "string" ? body.defaultPostalCode.trim() : "";
+    const marketingEmailOptIn =
+      typeof body?.marketingEmailOptIn === "boolean"
+        ? body.marketingEmailOptIn
+        : Boolean(customer.marketingEmailOptIn);
 
     if (!name) {
       return NextResponse.json({ error: "Name is required." }, { status: 400 });
@@ -73,6 +81,9 @@ export async function PATCH(req: NextRequest) {
         phone,
         defaultAddress,
         defaultCity,
+        defaultDistrict,
+        defaultPostalCode,
+        marketingEmailOptIn,
       },
       overrideAccess: true,
     });
@@ -85,6 +96,9 @@ export async function PATCH(req: NextRequest) {
         phone: updated.phone || null,
         defaultAddress: updated.defaultAddress || null,
         defaultCity: updated.defaultCity || null,
+        defaultDistrict: updated.defaultDistrict || null,
+        defaultPostalCode: updated.defaultPostalCode || null,
+        marketingEmailOptIn: Boolean(updated.marketingEmailOptIn),
       },
     });
   } catch (err: unknown) {
