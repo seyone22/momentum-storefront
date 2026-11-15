@@ -1,31 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import Link from "next/link";
 
 const CONSENT_STORAGE_KEY = "momentum_cookie_consent_v1";
+const CONSENT_EVENT = "momentum-cookie-consent-change";
+
+function subscribe(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener(CONSENT_EVENT, callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(CONSENT_EVENT, callback);
+  };
+}
+
+function getSnapshot(): boolean {
+  try {
+    return !window.localStorage.getItem(CONSENT_STORAGE_KEY);
+  } catch {
+    return false;
+  }
+}
+
+function getServerSnapshot(): boolean {
+  return false;
+}
 
 export default function CookieConsent() {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(CONSENT_STORAGE_KEY);
-      if (!saved) {
-        setVisible(true);
-      }
-    } catch {
-      // Ignore storage access errors in restricted browsing modes
-    }
-  }, []);
+  const visible = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const handleChoice = (choice: "accepted" | "essential") => {
     try {
       window.localStorage.setItem(CONSENT_STORAGE_KEY, choice);
+      window.dispatchEvent(new Event(CONSENT_EVENT));
     } catch {
-      // Ignore storage access errors
+      // Ignore storage access errors in restricted browsing modes
     }
-    setVisible(false);
   };
 
   if (!visible) return null;
