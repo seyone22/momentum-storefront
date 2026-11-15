@@ -9,6 +9,7 @@ import * as migration_20261115_163000_add_attribution_and_whatsapp_group from '.
 import * as migration_20261115_170000_add_customers_collection from './20261115_170000_add_customers_collection';
 import * as migration_20261115_173000_add_district_zip_marketing from './20261115_173000_add_district_zip_marketing';
 import * as migration_20261115_180000_add_shipping_and_audit_logs from './20261115_180000_add_shipping_and_audit_logs';
+import * as migration_20261115_182000_add_audit_logs_locked_rel from './20261115_182000_add_audit_logs_locked_rel';
 
 export const migrations = [
   {
@@ -65,5 +66,10 @@ export const migrations = [
     up: migration_20261115_180000_add_shipping_and_audit_logs.up,
     down: migration_20261115_180000_add_shipping_and_audit_logs.down,
     name: '20261115_180000_add_shipping_and_audit_logs',
+  },
+  {
+    up: migration_20261115_182000_add_audit_logs_locked_rel.up,
+    down: migration_20261115_182000_add_audit_logs_locked_rel.down,
+    name: '20261115_182000_add_audit_logs_locked_rel',
   },
 ];
